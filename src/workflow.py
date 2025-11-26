@@ -1,6 +1,5 @@
 import re
 import json
-import time
 from src.config import (
     NUM_READINESS_CHUNKS, NUM_MASTERY_CHUNKS, NUM_READINESS_ITEMS, NUM_MASTERY_ITEMS,
     readiness_item_to_prompt, mastery_item_to_prompt, JUDGE_PROMPT
@@ -56,7 +55,7 @@ def assemble_skeleton_prompts(skeletons, items, additional_info, previous_result
 
     return finished_prompts
 
-def grading(prompts, rubric_items, is_readiness, assemble_or_not, cache_name, video_uri, credentials):
+def grading(prompts, rubric_items, is_readiness, assemble_or_not, cache_name, video_uri, credentials, temperature):
     """Runs the grading phase."""
     grading_schema = {
         "type": "object",
@@ -77,7 +76,7 @@ def grading(prompts, rubric_items, is_readiness, assemble_or_not, cache_name, vi
     }
 
     assembled_prompts = assemble_skeleton_prompts(prompts, rubric_items, None, None, assemble_or_not, is_readiness)
-    cache_name, responses = poll_vertex(assembled_prompts, grading_schema, cache_name, video_uri, credentials)
+    cache_name, responses = poll_vertex(assembled_prompts, grading_schema, cache_name, video_uri, credentials, temperature)
 
     # Process responses
     grading_scores = []
@@ -163,7 +162,7 @@ def evaluation(prompts, rubric_items, grading_strings, is_readiness, assemble_or
     }
 
     eval_prompts = assemble_skeleton_prompts(prompts, rubric_items, None, grading_strings, assemble_or_not, is_readiness)
-    cache_name, responses = poll_vertex(eval_prompts, eval_schema, cache_name, video_uri, credentials)
+    cache_name, responses = poll_vertex(eval_prompts, eval_schema, cache_name, video_uri, credentials, temperature=1.0)
 
     eval_verdicts = []
     for response in responses:
@@ -234,7 +233,7 @@ def judge(cache_name, item, g1, e1, g2, e2, video_uri, credentials):
     }
     
     prompt = assemble_judge(item, g1, e1, g2, e2)
-    cache_name, responses = poll_vertex([prompt], judge_schema, cache_name, video_uri, credentials)
+    cache_name, responses = poll_vertex([prompt], judge_schema, cache_name, video_uri, credentials, temperature=1.0)
     
     judge_json = responses[0].json()
     metadata = judge_json.get("usageMetadata", {})

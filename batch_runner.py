@@ -93,7 +93,7 @@ def process_video(video_uri, output_dir):
             r_regrade_prompts = [REGRADER for _ in range(NUM_READINESS_CHUNKS)]
             cache_name, r_grad_str_2, r_grades_2, r_tok_2 = grading(
                 r_regrade_prompts, readiness_rubric, True, 
-                r_redos, cache_name, video_uri, credentials
+                r_redos, cache_name, video_uri, credentials, temperature=1.4
             )
             readiness_data["grading_strings_r2"] = r_grad_str_2
             readiness_data["grading_tokens_r2"] = r_tok_2
@@ -183,7 +183,7 @@ def process_video(video_uri, output_dir):
             m_regrade_prompts = [REGRADER for _ in range(NUM_MASTERY_CHUNKS)]
             cache_name, m_grad_str_2, m_grades_2, m_tok_2 = grading(
                 m_regrade_prompts, mastery_rubric, False,
-                m_redos, cache_name, video_uri, credentials
+                m_redos, cache_name, video_uri, credentials, temperature=1.4
             )
             mastery_data["grading_strings_r2"] = m_grad_str_2
             mastery_data["grading_tokens_r2"] = m_tok_2

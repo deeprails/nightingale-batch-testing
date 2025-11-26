@@ -92,33 +92,62 @@ def convert_judge_score(score):
     return score_map.get(score, score)
 
 def flatten_data(data):
-    """Combine readiness and mastery data into single lists."""
+    """
+    Combine readiness and mastery data into single lists, **aligned by rubric item**.
+
+    We do not assume that the per-phase reporting lists (e.g. grading_strings_r2)
+    are full length; instead we align them against the grade arrays, filling in
+    sensible defaults when a particular item/round was never run.
+    """
     if not data.get("readiness_data") or not data.get("mastery_data"):
-        return None # Incomplete data
-        
-    rd = data["readiness_data"]
-    md = data["mastery_data"]
-    
-    flat = {}
-    keys = ["grading_strings_r1", "grading_tokens_r1", "eval_strings_r1", "eval_tokens_r1",
-            "grading_strings_r2", "grading_tokens_r2", "eval_strings_r2", "eval_tokens_r2",
-            "judge_rationales", "judge_tokens"]
-            
-    for k in keys:
-        flat[k] = rd.get(k, []) + md.get(k, [])
-    
-    # Handle grades separately
-    flat["grades"] = data["readiness_grades"] + data["mastery_grades"]
-    
-    # Fill gaps
-    total_items = NUM_READINESS_ITEMS + NUM_MASTERY_ITEMS
-    for k in keys:
-        while len(flat[k]) < total_items:
-            if "tokens" in k:
-                flat[k].append((0,0))
-            else:
-                flat[k].append("")
-                
+        return None  # Incomplete data
+
+    rd = data["readiness_data"] or {}
+    md = data["mastery_data"] or {}
+
+    readiness_grades = data.get("readiness_grades", [])
+    mastery_grades = data.get("mastery_grades", [])
+
+    num_readiness = len(readiness_grades)
+    num_mastery = len(mastery_grades)
+    total_items = num_readiness + num_mastery
+
+    keys = [
+        "grading_strings_r1", "grading_tokens_r1",
+        "eval_strings_r1", "eval_tokens_r1",
+        "grading_strings_r2", "grading_tokens_r2",
+        "eval_strings_r2", "eval_tokens_r2",
+        "judge_rationales", "judge_tokens",
+    ]
+
+    # Helper to safely pull a value for a given item index, falling back
+    # to an appropriate "empty" default when the list is missing/short.
+    def get_item(src, key, idx):
+        seq = src.get(key, [])
+        if idx < len(seq):
+            return seq[idx]
+        # Default based on key type
+        if "tokens" in key:
+            return (0, 0)
+        return ""
+
+    flat = {k: [] for k in keys}
+    flat["grades"] = []
+
+    for global_idx in range(total_items):
+        if global_idx < num_readiness:
+            src = rd
+            local_idx = global_idx
+            grade = readiness_grades[local_idx]
+        else:
+            src = md
+            local_idx = global_idx - num_readiness
+            grade = mastery_grades[local_idx]
+
+        flat["grades"].append(grade)
+        for k in keys:
+            flat[k].append(get_item(src, k, local_idx))
+
     return flat
 
 def upload_results(json_dir, spreadsheet_id, sheet_name):

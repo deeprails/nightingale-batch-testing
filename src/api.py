@@ -22,7 +22,7 @@ def refresh_credentials(credentials):
     }
     return headers
 
-def prepare_requests(prompts, response_schema, video_cache):
+def prepare_requests(prompts, response_schema, video_cache, temperature):
     """Prepares the request body for Vertex AI."""
     contents_array = []
     for prompt in prompts:
@@ -38,7 +38,8 @@ def prepare_requests(prompts, response_schema, video_cache):
             "contents": c,
             "generationConfig": {
                 "responseMimeType": "application/json",
-                "responseJsonSchema": response_schema
+                "responseJsonSchema": response_schema,
+                "temperature": temperature
             }
         })
     return request_array
@@ -84,7 +85,7 @@ def cache_video(video_uri, ttl, credentials):
             
     raise Exception(f"Failed to cache video after retries. Status: {response.status_code}")
 
-def poll_vertex(prompts, response_schema, cache_name, video_uri, credentials):
+def poll_vertex(prompts, response_schema, cache_name, video_uri, credentials, temperature):
     """Polls Vertex AI with the given prompts."""
     url = (
         f"https://aiplatform.googleapis.com/v1/projects/{PROJECT_ID}"
@@ -92,7 +93,7 @@ def poll_vertex(prompts, response_schema, cache_name, video_uri, credentials):
     )
 
     headers = refresh_credentials(credentials)
-    request_array = prepare_requests(prompts, response_schema, cache_name)
+    request_array = prepare_requests(prompts, response_schema, cache_name, temperature)
     
     responses = []
     REQUEST_RETRIES = 5 
@@ -119,7 +120,7 @@ def poll_vertex(prompts, response_schema, cache_name, video_uri, credentials):
                     cache_resp = cache_video(video_uri, 600.0, credentials)
                     cache_name = cache_resp.json()["name"]
                     # Update ALL remaining requests with new cache name
-                    request_array = prepare_requests(prompts, response_schema, cache_name)
+                    request_array = prepare_requests(prompts, response_schema, cache_name, temperature)
                     # Retry current request
                     continue
                 
