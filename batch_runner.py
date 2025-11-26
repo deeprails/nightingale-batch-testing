@@ -132,14 +132,13 @@ def process_video(video_uri, output_dir):
                     readiness_data["judge_tokens"][i] = j_tok
 
         # Check Readiness Pass/Fail
-        readiness_passed = True
+        readiness_passes = 0
         for i in range(NUM_READINESS_ITEMS):
             final = all_readiness_grades[i][2] or all_readiness_grades[i][1] or all_readiness_grades[i][0]
-            if final != "Pass":
-                readiness_passed = False
-                break
+            if final == "Pass":
+                readiness_passes += 1
         
-        if not readiness_passed:
+        if readiness_passes / NUM_READINESS_ITEMS < 0.8:
             print(f"Readiness failed for {video_uri}. Skipping Mastery.")
             result = {
                 "video_uri": video_uri,
