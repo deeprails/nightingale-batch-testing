@@ -1,3 +1,4 @@
-results/*
+results/
 src/config.py
 service_account.json
+__pycache__/
