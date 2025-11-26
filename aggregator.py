@@ -227,11 +227,18 @@ def upload_results(json_dir, spreadsheet_id, sheet_name):
                 if not t: return ""
                 return t[idx] if t[idx] > 0 else ""
 
+            # Extract video ID from URI
+            video_uri = data['video_uri']
+            video_id = ""
+            parts = video_uri.split('_')
+            if len(parts) >= 2:
+                video_id = parts[1]
+
             row = [
                 i + 1,
                 timestamp,
                 VIDEO_TYPE_NAME,
-                data['video_uri'], # Using URI as ID for now
+                video_id,
                 "", # Tokens Consumed (computed)
                 FPS,
                 "", # CODE DUMP
