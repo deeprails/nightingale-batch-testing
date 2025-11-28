@@ -22,13 +22,22 @@ def assemble_skeleton_prompts(skeletons, items, additional_info, previous_result
     items_for_prompts = [""] * num_chunks
     info_for_prompts = [""] * num_chunks
     results_for_prompts = [""] * num_chunks
+    
+    # Track which info has been added to which chunk to avoid duplication
+    added_info_hashes = [set() for _ in range(num_chunks)]
 
     for i in range(len(items)):
         if assemble_or_not[i]:
             chunk_idx = mapping[i]
             items_for_prompts[chunk_idx] += "\n" + items[i]
+            
             if additional_info is not None:
-                info_for_prompts[chunk_idx] += "\n" + additional_info[i]
+                info_text = additional_info[i]
+                # Simple hash or just string check to avoid dupes in the same chunk
+                if info_text and info_text not in added_info_hashes[chunk_idx]:
+                    info_for_prompts[chunk_idx] += "\n" + info_text
+                    added_info_hashes[chunk_idx].add(info_text)
+                    
             if previous_results is not None:
                 results_for_prompts[chunk_idx] += "\n" + previous_results[i]
 
@@ -40,11 +49,12 @@ def assemble_skeleton_prompts(skeletons, items, additional_info, previous_result
             item_target = "{{{RUBRIC_ITEMS}}}"
             filled_skeleton = re.sub(item_target, item_pattern, skeletons[i])
             
-            if additional_info is not None:
-                info_target = "{{{INFO}}}"
-                # Note: info might be empty string if not used
-                info_pattern = re.escape(info_for_prompts[i])
-                filled_skeleton = re.sub(info_target, info_pattern, filled_skeleton)
+            # Always try to replace INFO, even if empty (it will just remove the placeholder if info is empty string)
+            info_target = "{{{INFO}}}"
+            # If additional_info was None, info_for_prompts[i] is empty string, which is fine
+            # But we need to make sure we don't leave {{{INFO}}} if it wasn't replaced
+            info_pattern = re.escape(info_for_prompts[i])
+            filled_skeleton = re.sub(info_target, info_pattern, filled_skeleton)
                 
             if previous_results is not None:
                 prev_target = "{{{PREVIOUS_RESULTS}}}"
@@ -55,7 +65,7 @@ def assemble_skeleton_prompts(skeletons, items, additional_info, previous_result
 
     return finished_prompts
 
-def grading(prompts, rubric_items, is_readiness, assemble_or_not, cache_name, video_uri, credentials, temperature):
+def grading(prompts, rubric_items, additional_info, is_readiness, assemble_or_not, cache_name, video_uri, credentials, temperature):
     """Runs the grading phase."""
     grading_schema = {
         "type": "object",
@@ -75,7 +85,7 @@ def grading(prompts, rubric_items, is_readiness, assemble_or_not, cache_name, vi
         "required": ["scores"]
     }
 
-    assembled_prompts = assemble_skeleton_prompts(prompts, rubric_items, None, None, assemble_or_not, is_readiness)
+    assembled_prompts = assemble_skeleton_prompts(prompts, rubric_items, additional_info, None, assemble_or_not, is_readiness)
     cache_name, responses = poll_vertex(assembled_prompts, grading_schema, cache_name, video_uri, credentials, temperature)
 
     # Process responses
@@ -140,7 +150,7 @@ def grading(prompts, rubric_items, is_readiness, assemble_or_not, cache_name, vi
 
     return cache_name, grading_result_strings, scores, token_data
 
-def evaluation(prompts, rubric_items, grading_strings, is_readiness, assemble_or_not, cache_name, video_uri, credentials):
+def evaluation(prompts, rubric_items, additional_info, grading_strings, is_readiness, assemble_or_not, cache_name, video_uri, credentials):
     """Runs the evaluation phase."""
     eval_schema = {
         "type": "object",
@@ -161,7 +171,7 @@ def evaluation(prompts, rubric_items, grading_strings, is_readiness, assemble_or
         "required": ["verdicts"]
     }
 
-    eval_prompts = assemble_skeleton_prompts(prompts, rubric_items, None, grading_strings, assemble_or_not, is_readiness)
+    eval_prompts = assemble_skeleton_prompts(prompts, rubric_items, additional_info, grading_strings, assemble_or_not, is_readiness)
     cache_name, responses = poll_vertex(eval_prompts, eval_schema, cache_name, video_uri, credentials, temperature=1.0)
 
     eval_verdicts = []
@@ -213,15 +223,16 @@ def evaluation(prompts, rubric_items, grading_strings, is_readiness, assemble_or
 
     return cache_name, eval_strings, agreements, token_data
 
-def assemble_judge(item, g1, e1, g2, e2):
+def assemble_judge(item, g1, e1, g2, e2, info):
     filled = re.sub("{{{RUBRIC_ITEM}}}", re.escape(item), JUDGE_PROMPT)
     filled = re.sub("{{{GRADER_1_OUTPUT}}}", re.escape(g1), filled)
     filled = re.sub("{{{EVALUATOR_1_OUTPUT}}}", re.escape(e1), filled)
     filled = re.sub("{{{GRADER_2_OUTPUT}}}", re.escape(g2), filled)
     filled = re.sub("{{{EVALUATOR_2_OUTPUT}}}", re.escape(e2), filled)
+    filled = re.sub("{{{INFO}}}", re.escape(info), filled)
     return filled
 
-def judge(cache_name, item, g1, e1, g2, e2, video_uri, credentials):
+def judge(cache_name, item, g1, e1, g2, e2, info, video_uri, credentials):
     """Runs the judge phase."""
     judge_schema = {
         "type": "object",
@@ -232,7 +243,7 @@ def judge(cache_name, item, g1, e1, g2, e2, video_uri, credentials):
         "required": ["score", "rationale"]
     }
     
-    prompt = assemble_judge(item, g1, e1, g2, e2)
+    prompt = assemble_judge(item, g1, e1, g2, e2, info)
     cache_name, responses = poll_vertex([prompt], judge_schema, cache_name, video_uri, credentials, temperature=1.0)
     
     judge_json = responses[0].json()

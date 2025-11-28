@@ -55,11 +55,12 @@ def cache_video(video_uri, ttl, credentials):
                 {
                     "fileData": {
                         "fileUri": video_uri,
-                        "mimeType": "video/mp4",
+                        "mimeType": "video/mp4"
                     },
                     "videoMetadata": {
                         "fps": FPS, 
-                    }
+                    },
+                    "mediaResolution": {"level": "MEDIA_RESOLUTION_HIGH"}
                 },
             ]
         }],
