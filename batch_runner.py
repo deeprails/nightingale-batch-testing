@@ -9,7 +9,8 @@ from src.config import (
     PROMPT_1, PROMPT_2, PROMPT_3, PROMPT_4, PROMPT_5, PROMPT_6, 
     PROMPT_7, PROMPT_8, PROMPT_9, PROMPT_10, PROMPT_11, PROMPT_12,
     EVALUATOR, REGRADER,
-    NUM_READINESS_CHUNKS, NUM_MASTERY_CHUNKS, TTL_SECONDS
+    NUM_READINESS_CHUNKS, NUM_MASTERY_CHUNKS, TTL_SECONDS,
+    PROMPT_VERSION, MODEL_NAME
 )
 from src.api import get_credentials, cache_video
 from src.workflow import grading, evaluation, judge
@@ -247,6 +248,8 @@ def _save_result(result, output_dir):
     """Helper to save individual result to JSON safely."""
     # Generate a hash of the URI to ensure filename is short and unique
     uri_hash = hashlib.md5(result["video_uri"].encode("utf-8")).hexdigest()
+
+    result["prompt_id"] = PROMPT_VERSION + " - " + MODEL_NAME
     
     # Try to keep a recognizable prefix from the filename
     base_name = os.path.basename(result["video_uri"])

@@ -268,9 +268,12 @@ def upload_results(json_dir, spreadsheet_id, sheet_name):
             if len(parts) >= 2:
                 video_id = parts[1]
 
+            prompt_id = data['prompt_id']
+
             row = [
                 i + 1,
                 timestamp,
+                prompt_id,
                 VIDEO_TYPE_NAME,
                 video_id,
                 "",  # Tokens Consumed (computed)
@@ -279,6 +282,7 @@ def upload_results(json_dir, spreadsheet_id, sheet_name):
                 "",  # Stage Consensus Reached
                 "",  # FINAL SCORE
                 "",  # FINAL SCORE - AI-ENG. CHECK
+                "",  # FINAL SCORE - AI-ENG. SCORE
                 r1_score,
                 r1_rationale or "",
                 get_tok(g_tokens_r1, 0),
@@ -289,6 +293,7 @@ def upload_results(json_dir, spreadsheet_id, sheet_name):
                 get_tok(e_tokens_r1, 0),
                 get_tok(e_tokens_r1, 1),
                 "",  # R1 CHECK
+                "",  # R1 SCORE
                 "",  # R1 COMMENTS
                 r2_score,
                 r2_rationale or "",
@@ -300,12 +305,14 @@ def upload_results(json_dir, spreadsheet_id, sheet_name):
                 get_tok(e_tokens_r2, 0),
                 get_tok(e_tokens_r2, 1),
                 "",  # R2 CHECK
+                "",  # R2 SCORE
                 "",  # R2 COMMENTS
                 r3_score,
                 r3_rationale,
                 get_tok(j_tokens, 0),
                 get_tok(j_tokens, 1),
                 "",  # R3 CHECK
+                "",  # R3 SCORE
                 "",  # R3 COMMENTS
             ]
             rows_to_upload.append(row)
