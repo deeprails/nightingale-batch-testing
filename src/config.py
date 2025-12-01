@@ -80,7 +80,7 @@ RUBRIC_ITEMS = [
     # Item 30
     "Touches only the sterile glove outer wrapper when opening it.",
     # Item 31
-    "Without touching anything else, places or gently drops the inner wrapper onto the clear, clean surface",
+    "Places or gently drops the inner wrapper onto the clear, clean surface. The student should only touch the sterile glove outer wrapper while completing this step, and not touch anything else.",
     # Item 32
     "Opens sterile glove inner wrapper and establishes sterile field without touching or overlapping other surfaces",
     # Item 33
@@ -254,8 +254,8 @@ You will be evaluating whether or not the student did six things properly:
 
 ### Steps
 1. Read the Rules section below, being sure to understand them completely and keep them in mind during your evaluation.
-2, Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
-3. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning. Output True for that item if they did and False if they did not.
+2. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
+3. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning.
 4. Attach a clear and brief piece of feedback with a neutral tone to each score that summarizes your chain-of-thought reasoning.
 5. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
@@ -273,8 +273,8 @@ You will be evaluating whether or not the student prepared six things properly:
 
 ### Steps
 1. Read the Rules section below, being sure to understand them completely and keep them in mind during your evaluation.
-2, Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
-3. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning. Output True for that item if they did and False if they did not.
+2. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
+3. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning.
 4. Attach a clear and brief piece of feedback with a neutral tone to each score that summarizes your chain-of-thought reasoning.
 5. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
@@ -292,8 +292,8 @@ You will be evaluating whether or not the student completed five components of h
 
 ### Steps
 1. Read the Rules section below, being sure to understand them completely and keep them in mind during your evaluation.
-2, Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
-3. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning. Output True for that item if they did and False if they did not.
+2. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
+3. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning.
 4. Attach a clear and brief piece of feedback with a neutral tone to each score that summarizes your chain-of-thought reasoning.
 5. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
@@ -311,8 +311,8 @@ You will be evaluating whether or not the student completed five components of h
 
 ### Steps
 1. Read the Rules section below, being sure to understand them completely and keep them in mind during your evaluation.
-2, Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
-3. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning. Output True for that item if they did and False if they did not.
+2. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
+3. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning.
 4. Attach a clear and brief piece of feedback with a neutral tone to each score that summarizes your chain-of-thought reasoning.
 5. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
@@ -330,8 +330,8 @@ You will be evaluating whether or not the student completed six components of ha
 
 ### Steps
 1. Read the Rules section below, being sure to understand them completely and keep them in mind during your evaluation.
-2, Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
-3. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning. Output True for that item if they did and False if they did not.
+2. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
+3. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning.
 4. Attach a clear and brief piece of feedback with a neutral tone to each score that summarizes your chain-of-thought reasoning.
 5. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
@@ -349,8 +349,8 @@ You will be evaluating whether or not the student completed three components of 
 
 ### Steps
 1. Read the Rules section below, being sure to understand them completely and keep them in mind during your evaluation.
-2, Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
-3. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning. Output True for that item if they did and False if they did not.
+2. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
+3. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning.
 4. Attach a clear and brief piece of feedback with a neutral tone to each score that summarizes your chain-of-thought reasoning.
 5. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
@@ -369,7 +369,7 @@ You will be evaluating whether or not the student completed two components of gl
 ### Steps
 1. Read the examples below and use them to understand how students may fail or succeed to complete the skill mastery criteria.
 2. Watch the video and assess whether the student completed each of the skill mastery criteria successfully and continuously.
-3. For each item, evaluate if the student completed the exact task or exhibited exactly the prescribed behavior using chain-of-thought reasoning. Output True for the item if they did and False if they did not.
+3. For each item, evaluate if the student completed the exact task or exhibited exactly the prescribed behavior using chain-of-thought reasoning.
 4. Attach a clear and brief piece of feedback with a neutral tone to each score that summarizes your chain-of-thought reasoning.
 5. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
@@ -387,8 +387,8 @@ You will be evaluating whether or not the student completed four components of g
 
 ### Steps
 1. Read the Rules section below, being sure to understand them completely and keep them in mind during your evaluation.
-2, Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
-3. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning. Output True for that item if they did and False if they did not.
+2. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
+3. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning.
 4. Attach a clear and brief piece of feedback with a neutral tone to each score that summarizes your chain-of-thought reasoning.
 5. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
@@ -406,8 +406,8 @@ You will be evaluating whether or not the student completed five components of g
 
 ### Steps
 1. Read the Rules section below, being sure to understand them completely and keep them in mind during your evaluation.
-2, Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
-3. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning. Output True for that item if they did and False if they did not.
+2. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
+3. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning.
 4. Attach a clear and brief piece of feedback with a neutral tone to each score that summarizes your chain-of-thought reasoning.
 5. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
@@ -426,7 +426,7 @@ You will be evaluating whether or not the student completed three components of 
 ### Steps
 1. Read the Rules section below, being sure to understand them completely and keep them in mind during your evaluation.
 2. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
-3. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning. Output True for that item if they did and False if they did not.
+3. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning.
 4. Attach a clear and brief piece of feedback with a neutral tone to each score that summarizes your chain-of-thought reasoning.
 5. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
@@ -444,7 +444,7 @@ You will be evaluating whether or not the student completed four components of g
 
 ### Steps
 1. Watch the video and assess whether the student completed each of the skill mastery criteria successfully and continuously.
-2. For each item, evaluate if the student completed the exact task or exhibited exactly the prescribed behavior using chain-of-thought reasoning. Output True for the item if they did and False if they did not.
+2. For each item, evaluate if the student completed the exact task or exhibited exactly the prescribed behavior using chain-of-thought reasoning.
 3. Attach a clear and brief piece of feedback with a neutral tone to each score that summarizes your chain-of-thought reasoning.
 4. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
@@ -462,7 +462,7 @@ You will be evaluating whether or not the student completed four components of g
 
 ### Steps
 1. Watch the video and assess whether the student completed each of the skill mastery criteria successfully and continuously.
-2. For each item, evaluate if the student completed the exact task or exhibited exactly the prescribed behavior using chain-of-thought reasoning. Output True for the item if they did and False if they did not.
+2. For each item, evaluate if the student completed the exact task or exhibited exactly the prescribed behavior using chain-of-thought reasoning.
 3. Attach a clear and brief piece of feedback with a neutral tone to each score that summarizes your chain-of-thought reasoning.
 4. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
@@ -472,7 +472,7 @@ You will be evaluating whether or not the student completed four components of g
 """
 
 EVALUATOR = """
-You are an expert nursing education evaluator who checks the work of nursing education graders. Your job is to review a video of a nursing student demonstrating a nursing student demonstrating a specific skill, and then evaluate specific components of the task independently and compare them to the grader’s assessment.
+You are an expert nursing education evaluator who checks the work of nursing education graders. Your job is to review a video of a nursing student demonstrating a specific skill, and then evaluate specific components of the task independently and compare them to the grader’s assessment.
 
 ### Rubric Items
 You will be evaluating the following items:
@@ -504,9 +504,9 @@ An evaluator disagreed with the original grader on the following items:
 
 ### Steps
 1. Read the section below, being sure to understand the information completely and keep it in mind during your evaluation.
-2. Review each of the rubric items, keeping the rules and/or examples in mind as you understand the requirements.
-3. Watch the video and re-assess each listed item, being sure the student absolutely meets the rubric item's criteria.
-4. For each item, decide whether the student met the rubric criteria, thinking step by step.
+2. Review each of the rubric items, keeping the rules and/or examples in mind as you review the requirements for each rubric item.
+3. Watch the video and assess whether the student completed each of the rubric items completely and fully, thinking step by step. Remember to keep the rules and/or examples in mind as you do this.
+4. For each item, evaluate if the student completed the exact task or exhibited exactly the prescribed behavior using chain-of-thought reasoning.
 5. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
    - `rationale`: A concise but complete explanation of your judgment. Write clearly with a neutral tone as if giving feedback to the student, covering all relevant details.
