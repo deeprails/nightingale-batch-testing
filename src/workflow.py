@@ -27,19 +27,30 @@ def assemble_skeleton_prompts(skeletons, items, additional_info, previous_result
     added_info_hashes = [set() for _ in range(num_chunks)]
 
     for i in range(len(items)):
-        if assemble_or_not[i]:
-            chunk_idx = mapping[i]
-            items_for_prompts[chunk_idx] += "\n" + items[i]
-            
+        try:
+            if assemble_or_not[i]:
+                chunk_idx = mapping[i]
+                items_for_prompts[chunk_idx] += "\n" + items[i]
+                
+                if additional_info is not None:
+                    info_text = additional_info[i]
+                    # Simple hash or just string check to avoid dupes in the same chunk
+                    if info_text and info_text not in added_info_hashes[chunk_idx]:
+                        info_for_prompts[chunk_idx] += "\n" + info_text
+                        added_info_hashes[chunk_idx].add(info_text)
+                        
+                if previous_results is not None:
+                    results_for_prompts[chunk_idx] += "\n" + previous_results[i]
+        except IndexError as e:
+            print(f"DEBUG: IndexError in assemble_skeleton_prompts at i={i}")
+            print(f"DEBUG: len(items)={len(items)}")
+            print(f"DEBUG: len(assemble_or_not)={len(assemble_or_not)}")
+            print(f"DEBUG: len(mapping)={len(mapping)}")
             if additional_info is not None:
-                info_text = additional_info[i]
-                # Simple hash or just string check to avoid dupes in the same chunk
-                if info_text and info_text not in added_info_hashes[chunk_idx]:
-                    info_for_prompts[chunk_idx] += "\n" + info_text
-                    added_info_hashes[chunk_idx].add(info_text)
-                    
+                print(f"DEBUG: len(additional_info)={len(additional_info)}")
             if previous_results is not None:
-                results_for_prompts[chunk_idx] += "\n" + previous_results[i]
+                print(f"DEBUG: len(previous_results)={len(previous_results)}")
+            raise e
 
     finished_prompts = []
     for i in range(len(items_for_prompts)):

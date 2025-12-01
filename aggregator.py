@@ -168,7 +168,7 @@ def upload_results(json_dir, spreadsheet_id, sheet_name):
     json_files = glob.glob(os.path.join(json_dir, "*.json"))
     print(f"Found {len(json_files)} JSON result files.")
 
-    start_row = find_first_empty_row(worksheet, 'C')
+    start_row = find_first_empty_row(worksheet, 'D')
     print(f"Starting upload at row {start_row}")
 
     rows_to_upload = []
@@ -326,7 +326,7 @@ def upload_results(json_dir, spreadsheet_id, sheet_name):
         # But if we are appending to new rows, we can just use append_rows or update range.
         # Notebook used batch_update with specific ranges.
 
-        merge_columns = [4, 12, 13, 17, 18, 23, 24, 28, 29, 34, 35]
+        merge_columns = [5, 14, 15, 19, 20, 26, 27, 31, 32, 38, 39]
 
         cell_updates = []
         for row_idx, row in enumerate(rows_to_upload):

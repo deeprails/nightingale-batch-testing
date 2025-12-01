@@ -5,7 +5,7 @@ LOCATION = "global"
 MODEL_NAME = "gemini-3-pro-preview"
 BUCKET_NAME = "nightingale-deeprails-vertex-videos"
 VIDEO_TYPE_NAME = "BSN206 Handwashing"
-PROMPT_VERSION = "nov28_1"
+PROMPT_VERSION = "nov30_1"
 
 # Video Settings
 FPS = 10.0
@@ -50,9 +50,9 @@ RUBRIC_ITEMS = [
     # Item 15
     "Wets both hands",
     # Item 16
-    "Keeps both hands below the wrists at or below the level of the elbows when moving them toward soap dispenser. Brief movements upwards are acceptable.",
+    "Keeps both hands at or below the level of the elbows when moving them toward soap dispenser. Brief movements upwards are acceptable.",
     # Item 17
-    "Dispenses small amount of hand soap (~3-5 ml) onto to wet hands",
+    "Dispenses small amount of hand soap (~3-5 ml) onto wet hands (may use a hands free dispenser)",
     # Item 18
     "Positions fingers downward into the sink for most of the time while washing hands. Brief movements upwards are acceptable.",
     # Item 19
@@ -70,7 +70,7 @@ RUBRIC_ITEMS = [
     # Item 25
     "Dries hands generally starting from fingertips and ending at the wrists",
     # Item 26
-    "Disposes of paper towel in garbage can without touching the can with hands",
+    "Disposes of paper towel without contaminating their hands",
     # Item 27
     "Grabs another clean paper towel",
     # Item 28
@@ -86,23 +86,23 @@ RUBRIC_ITEMS = [
     # Item 33
     "Opens inner sterile wrapper by touching only the 1-inch folded margin edge",
     # Item 34
-    "With hand A, picks up the glove for the hand B by pinching the upper edge of cuff",
+    "With one hand, picks up the glove for the other hand by pinching the outside of the cuff",
     # Item 35
-    "Maintaining hold on the glove cuff, uses hand A to assist working hand B into the glove",
+    "Maintaining hold on the glove cuff, uses the grabbing hand to assist the other hand into the glove",
     # Item 36
-    "All fingers and thumb of hand B are in proper spaces in the glove and the folded cuff remains intact (not rolled out)",
+    "All fingers and thumb of the first gloved hand are in proper spaces in the glove and the folded cuff remains intact (not rolled out)",
     # Item 37
-    "Body of glove covers the entire hand B to the wrist and the rest of the lower arm remains unobstructed by jewelry or shirt sleeves",
+    "Body of glove covers the entire first gloved hand to the wrist and the rest of the lower arm remains unobstructed by shirt sleeves",
     # Item 38
-    "With the gloved hand (hand B), slides fingers under the cuff of glove for hand A (the ungloved hand)",
+    "With the gloved hand, slides fingers under the cuff of glove for the ungloved hand",
     # Item 39
-    "Maintains hold on the glove cuff for hand A without using thumb of hand B",
+    "Maintains hold on the glove cuff for the ungloved hand without using thumb of the gloved hand",
     # Item 40
-    "Uses only gloved hand B to assist positioning of hand A into the glove",
+    "Uses only gloved hand to assist positioning of the ungloved hand into the glove",
     # Item 41
-    "All fingers and thumb of hand A are in proper spaces in the glove and the folded cuff remains intact (not rolled out)",
+    "All fingers and thumb of the second gloved hand are in proper spaces in the glove and the folded cuff remains intact (not rolled out)",
     # Item 42
-    "Body of glove covers the entire hand A to the wrist and the rest of the lower arm remains unobstructed by jewelry or shirt sleeves",
+    "Body of glove covers the entire second gloved hand to the wrist and the rest of the lower arm remains unobstructed by shirt sleeves",
     # Item 43
     "After donning both gloves, keeps hands at or above the waist area for the majority of the time",
     # Item 44
@@ -211,27 +211,27 @@ RUBRIC_INFO = [
     # Item 37
     "### Success Examples\n - Opens sterile glove inner wrapper without touching other surfaces.\n - When opening inner wrapper, only touches folded portions and strictly inside the outer 1 inch margin of the unfolded section.\n\n### Failure Examples\n - Gloves move off the sterile field while opening inner wrapper.\n - Touches anywhere inside 1 inch margin of unfolded wrapper while establishing sterile field, even an inch and a half past the border is too far.",
     # Item 38
-    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the relevant item if sterility is broken.\n - Do not identify the student's hands as left or right. If you need to refer to the hands, use \"the first hand\", \"the second hand\", or something similar.",
+    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the one item closest to the sterility break.\n - Do not identify the student's hands as left or right. If you refer to the hands, say \"the first hand\" or \"the second hand\".",
     # Item 39
-    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the relevant item if sterility is broken.\n - Do not identify the student's hands as left or right. If you need to refer to the hands, use \"the first hand\", \"the second hand\", or something similar.",
+    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the one item closest to the sterility break.\n - Do not identify the student's hands as left or right. If you refer to the hands, say \"the first hand\" or \"the second hand\".",
     # Item 40
-    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the relevant item if sterility is broken.\n - Do not identify the student's hands as left or right. If you need to refer to the hands, use \"the first hand\", \"the second hand\", or something similar.",
+    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the one item closest to the sterility break.\n - Do not identify the student's hands as left or right. If you refer to the hands, say \"the first hand\" or \"the second hand\".",
     # Item 41
-    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the relevant item if sterility is broken.\n - Do not identify the student's hands as left or right. If you need to refer to the hands, use \"the first hand\", \"the second hand\", or something similar.",
+    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the one item closest to the sterility break.\n - Do not identify the student's hands as left or right. If you refer to the hands, say \"the first hand\" or \"the second hand\".",
     # Item 42
-    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the relevant item if sterility is broken.\n - Do not identify the student's hands as left or right. If you need to refer to the hands, use \"the first hand\", \"the second hand\", or something similar.",
+    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the one item closest to the sterility break.\n - Do not identify the student's hands as left or right. If you refer to the hands, say \"the first hand\" or \"the second hand\".",
     # Item 43
-    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the relevant item if sterility is broken.\n - Do not identify the student's hands as left or right. If you need to refer to the hands, use \"the first hand\", \"the second hand\", or something similar.",
+    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the one item closest to the sterility break.\n - Do not identify the student's hands as left or right. If you refer to the hands, say \"the first hand\" or \"the second hand\".",
     # Item 44
-    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the relevant item if sterility is broken.\n - Do not identify the student's hands as left or right. If you need to refer to the hands, use \"the first hand\", \"the second hand\", or something similar.",
+    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the one item closest to the sterility break.\n - Do not identify the student's hands as left or right. If you refer to the hands, say \"the first hand\" or \"the second hand\".",
     # Item 45
-    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the relevant item if sterility is broken.\n - Do not identify the student's hands as left or right. If you need to refer to the hands, use \"the first hand\", \"the second hand\", or something similar.",
+    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the one item closest to the sterility break.\n - Do not identify the student's hands as left or right. If you refer to the hands, say \"the first hand\" or \"the second hand\".",
     # Item 46
-    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the relevant item if sterility is broken.\n - Do not identify the student's hands as left or right. If you need to refer to the hands, use \"the first hand\", \"the second hand\", or something similar.",
+    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the one item closest to the sterility break.\n - Do not identify the student's hands as left or right. If you refer to the hands, say \"the first hand\" or \"the second hand\".",
     # Item 47
-    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the relevant item if sterility is broken.\n - Do not identify the student's hands as left or right. If you need to refer to the hands, use \"the first hand\", \"the second hand\", or something similar.",
+    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the one item closest to the sterility break.\n - Do not identify the student's hands as left or right. If you refer to the hands, say \"the first hand\" or \"the second hand\".",
     # Item 48
-    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the relevant item if sterility is broken.\n - Do not identify the student's hands as left or right. If you need to refer to the hands, use \"the first hand\", \"the second hand\", or something similar.",
+    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the one item closest to the sterility break.\n - Do not identify the student's hands as left or right. If you refer to the hands, say \"the first hand\" or \"the second hand\".",
     # Item 49
     "",
     # Item 50
@@ -484,7 +484,7 @@ The grader’s assessment for these items is as follows:
 
 ### Steps
 1. Read the section below, being sure to understand the information completely and keep it in mind during your evaluation.
-2. Watch the video and evaluate each rubric item independent of the grader, forming your own judgment for whether the student successfully met that item using the rules and/or examples.
+2. Watch the video and evaluate each rubric item independent of the grader, forming your own judgment for whether the student successfully met that item.
 3. For each rubric item, determine whether you agree with the grader’s original score, thinking step by step.
 4. For each rubric item, determine whether the grader's original rationale is correct and well written.
 5. For each item, output:
