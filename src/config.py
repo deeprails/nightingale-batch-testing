@@ -2,14 +2,14 @@
 # Project Configuration
 PROJECT_ID = "nightingale-deeprails"
 LOCATION = "global"
-MODEL_NAME = "gemini-3-pro-preview"
+MODEL_NAME = "gemini-2.5-pro"
 BUCKET_NAME = "nightingale-deeprails-vertex-videos"
 VIDEO_TYPE_NAME = "BSN206 Handwashing"
-PROMPT_VERSION = "nov30_1"
+PROMPT_VERSION = "new_dec2_1"
 
 # Video Settings
 FPS = 10.0
-TTL_SECONDS = 2100.0  # 35 minutes
+TTL_SECONDS = 2400.0  # 40 minutes
 
 # Logic Constants
 NUM_READINESS_CHUNKS = 2
@@ -54,11 +54,11 @@ RUBRIC_ITEMS = [
     # Item 17
     "Dispenses small amount of hand soap (~3-5 ml) onto wet hands (may use a hands free dispenser)",
     # Item 18
-    "Positions fingers downward into the sink for most of the time while washing hands. Brief movements upwards are acceptable.",
+    "Points fingers and arms downward into the sink most of the time while washing hands such that water can flow down their hands. Brief movements upwards are acceptable.",
     # Item 19
     "Washes all areas of both hands for at least 15 seconds",
     # Item 20
-    "Keeps fingers pointed downward into the sink for most of the time while rinsing both hands until all soap is gone. Brief movements upwards are acceptable.",
+    "Keeps fingers and arms pointed downward into the sink for most of the time while rinsing both hands until all soap is gone. Brief movements upwards are acceptable.",
     # Item 21
     "Does not touch sink areas during rinsing process",
     # Item 22
@@ -122,7 +122,7 @@ RUBRIC_ITEMS = [
     # Item 51
     "Pushing with the inserted fingers, fold the inside of glove over the outside",
     # Item 52
-    "As removal occurs, the second glove also rolls to cover the first glove",
+    "As removal occurs, the second glove also rolls to cover the first glove if it wasn't already disposed of",
     # Item 53
     "Discard used gloves in the trash receptacle"
 ]
@@ -193,7 +193,7 @@ RUBRIC_INFO = [
     # Item 28
     "### Rules\n - Verbalization of any of these rubric items is not a sufficient replacement for performing them. If the student only talks about and/or mimes the action, do not give them credit.",
     # Item 29
-    "### Rules\n - Verbalization of any of these rubric items is not a sufficient replacement for performing them. If the student only talks about and/or mimes the action, do not give them credit.",
+    "### Rules\n - Verbalization of any of these rubric items is not a sufficient replacement for performing them. If the student only talks about and/or mimes the action, do not give them credit.\n - For the purposes of the video, the student touching the recording device to transition is not a break in sterility.",
     # Item 30
     "### Rules\n - Verbalization of any of these rubric items is not a sufficient replacement for performing them. If the student only talks about and/or mimes the action, do not give them credit.",
     # Item 31
@@ -489,7 +489,6 @@ The grader’s assessment for these items is as follows:
 4. For each rubric item, determine whether the grader's original rationale is correct and well written.
 5. For each item, output:
    - `score_verdict`: **True** if you agree with the grader’s score for this item, or **False** if you do not.
-   - `rationale_verdict`: **True** if you agree with the grader’s rationale for this item, or **False** if you do not.
    - `reasoning`: A clear, detailed explanation of your reasoning (including why you agree or disagree with the grader on that item).
 
 {{{INFO}}}
@@ -504,8 +503,8 @@ An evaluator disagreed with the original grader on the following items:
 
 ### Steps
 1. Read the section below, being sure to understand the information completely and keep it in mind during your evaluation.
-2. Review each of the rubric items, keeping the rules and/or examples in mind as you review the requirements for each rubric item.
-3. Watch the video and assess whether the student completed each of the rubric items completely and fully, thinking step by step. Remember to keep the rules and/or examples in mind as you do this.
+2. Review the description ofeach of the rubric items, using the rules and/or examples to fully understand the requirements for each item.
+3. Watch the video and assess whether the student completed each of the rubric items completely and fully, thinking step by step.
 4. For each item, evaluate if the student completed the exact task or exhibited exactly the prescribed behavior using chain-of-thought reasoning.
 5. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.

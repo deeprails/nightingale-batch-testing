@@ -173,10 +173,11 @@ def process_video(video_uri, output_dir):
             all_mastery_grades[i][0] = g
         
         # Evaluation Round 1
+        m_proceeds = [g != "Pass" for g in m_grades_1]
         m_eval_prompts = [EVALUATOR for _ in range(NUM_MASTERY_CHUNKS)]
         cache_name, m_eval_str_1, m_agreements_1, m_eval_tok_1 = evaluation(
             m_eval_prompts, mastery_rubric, mastery_info, m_grad_str_1, False,
-            [True] * NUM_MASTERY_ITEMS, cache_name, video_uri, credentials
+            m_proceeds, cache_name, video_uri, credentials
         )
         mastery_data["eval_strings_r1"] = m_eval_str_1
         mastery_data["eval_tokens_r1"] = m_eval_tok_1
@@ -197,7 +198,7 @@ def process_video(video_uri, output_dir):
             for i, g in enumerate(m_grades_2):
                 if m_redos[i]:
                     all_mastery_grades[i][1] = g
-                    m_proceeds_2.append(True)
+                    m_proceeds_2.append(g != "Pass")
                 else:
                     m_proceeds_2.append(False)
                     
