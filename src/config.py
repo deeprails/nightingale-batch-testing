@@ -3,6 +3,7 @@
 PROJECT_ID = "nightingale-deeprails"
 LOCATION = "global"
 MODEL_NAME = "gemini-2.5-pro"
+MODEL_NAME = "gemini-2.5-pro"
 BUCKET_NAME = "nightingale-deeprails-vertex-videos"
 VIDEO_TYPE_NAME = "BSN206 Handwashing"
 PROMPT_VERSION = "new_dec2_1"
@@ -471,8 +472,30 @@ You will be evaluating whether or not the student completed four components of g
 {{{INFO}}}
 """
 
-EVALUATOR = """
+SCORE_EVALUATOR = """
 You are an expert nursing education evaluator who checks the work of nursing education graders. Your job is to review a video of a nursing student demonstrating a specific skill, and then evaluate specific components of the task independently and compare them to the grader’s assessment.
+
+### Rubric Items
+You will be evaluating the following items:
+{{{RUBRIC_ITEMS}}}
+
+### Grader’s Assessment
+The grader’s scores for these items is as follows:
+{{{PREVIOUS_RESULTS}}}
+
+### Steps
+1. Read the section below, being sure to understand the information completely and keep it in mind during your evaluation.
+2. Watch the video and evaluate each rubric item independent of the grader, forming your own judgment for whether the student successfully met the criteria for that item.
+3. For each rubric item, determine whether you agree with the grader’s original score, thinking step by step.
+4. For each item, output:
+   - `score_verdict`: **True** if you agree with the grader’s score for this item, or **False** if you do not.
+   - `reasoning`: A clear, detailed explanation of your reasoning (including why you agree or disagree with the grader on that item).
+
+{{{INFO}}}
+"""
+
+RATIONALE_EVALUATOR = """
+You are an expert nursing education evaluator who checks the work of nursing education graders. Your job is to review a video of a nursing student demonstrating a specific skill, and then confirm that the grader's feedback to the student is entirely accurate and on topic. The grader's score is confirmed to be correct, so you are just assessing the feedback.
 
 ### Rubric Items
 You will be evaluating the following items:
@@ -484,12 +507,12 @@ The grader’s assessment for these items is as follows:
 
 ### Steps
 1. Read the section below, being sure to understand the information completely and keep it in mind during your evaluation.
-2. Watch the video and evaluate each rubric item independent of the grader, forming your own judgment for whether the student successfully met that item.
-3. For each rubric item, determine whether you agree with the grader’s original score, thinking step by step.
-4. For each rubric item, determine whether the grader's original rationale is correct and well written.
-5. For each item, output:
-   - `score_verdict`: **True** if you agree with the grader’s score for this item, or **False** if you do not.
-   - `reasoning`: A clear, detailed explanation of your reasoning (including why you agree or disagree with the grader on that item).
+2. Watch the video and evaluate each rubric item, independently creating feedback for each item.
+3. For each rubric item, determine whether you agree with the grader’s original feedback, or if changes need to be made.
+4. When you decide the grader's feedback needs updated, write a new piece of feedback that corrects the errors and still is clear, concise, and kind. Do not rewrite the feedback if it is already correct.
+4. For each item, output:
+   - `rationale_verdict`: **True** if you agree with the grader’s rationale for this item, or **False** if you do not.
+   - `updated_feedback`: The updated feedback for the item if needed, or the original feedback if it is correct.
 
 {{{INFO}}}
 """
