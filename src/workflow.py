@@ -6,7 +6,7 @@ from src.config import (
 )
 from src.api import poll_vertex
 
-def assemble_skeleton_prompts(skeletons, items, additional_info, previous_results, assemble_or_not, is_readiness):
+def assemble_skeleton_prompts(skeletons, items, additional_info, previous_steps, previous_results, assemble_or_not, is_readiness):
     """Assembles the prompts by filling in the skeletons with rubric items."""
     # Validation
     if is_readiness:
@@ -71,12 +71,17 @@ def assemble_skeleton_prompts(skeletons, items, additional_info, previous_result
                 prev_target = "{{{PREVIOUS_RESULTS}}}"
                 prev_pattern = re.escape(results_for_prompts[i])
                 filled_skeleton = re.sub(prev_target, prev_pattern, filled_skeleton)
+
+            if previous_steps is not None:
+                prev_target = "{{{PREVIOUS_STEPS}}}"
+                prev_pattern = re.escape(previous_steps[i])
+                filled_skeleton = re.sub(prev_target, prev_pattern, filled_skeleton)
                 
             finished_prompts.append(filled_skeleton)
 
     return finished_prompts
 
-def grading(prompts, rubric_items, additional_info, is_readiness, assemble_or_not, cache_name, video_uri, credentials, temperature):
+def grading(prompts, rubric_items, additional_info, previous_steps, is_readiness, assemble_or_not, cache_name, video_uri, credentials, temperature):
     """Runs the grading phase."""
     grading_schema = {
         "type": "object",
@@ -96,7 +101,7 @@ def grading(prompts, rubric_items, additional_info, is_readiness, assemble_or_no
         "required": ["scores"]
     }
 
-    assembled_prompts = assemble_skeleton_prompts(prompts, rubric_items, additional_info, None, assemble_or_not, is_readiness)
+    assembled_prompts = assemble_skeleton_prompts(prompts, rubric_items, additional_info, previous_steps, None, assemble_or_not, is_readiness)
     cache_name, responses = poll_vertex(assembled_prompts, grading_schema, cache_name, video_uri, credentials, temperature)
 
     # Process responses
@@ -182,7 +187,7 @@ def evaluation(prompts, rubric_items, additional_info, grading_strings, is_readi
         "required": ["verdicts"]
     }
 
-    eval_prompts = assemble_skeleton_prompts(prompts, rubric_items, additional_info, grading_strings, assemble_or_not, is_readiness)
+    eval_prompts = assemble_skeleton_prompts(prompts, rubric_items, additional_info, None, grading_strings, assemble_or_not, is_readiness)
     cache_name, responses = poll_vertex(eval_prompts, eval_schema, cache_name, video_uri, credentials, temperature=1.0)
 
     eval_verdicts = []

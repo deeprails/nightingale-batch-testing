@@ -10,7 +10,8 @@ from src.config import (
     PROMPT_7, PROMPT_8, PROMPT_9, PROMPT_10, PROMPT_11, PROMPT_12,
     EVALUATOR, REGRADER,
     NUM_READINESS_CHUNKS, NUM_MASTERY_CHUNKS, TTL_SECONDS,
-    PROMPT_VERSION, MODEL_NAME
+    PROMPT_VERSION, MODEL_NAME,
+    mastery_item_to_prompt
 )
 from src.api import get_credentials, cache_video
 from src.workflow import grading, evaluation, judge
@@ -71,7 +72,7 @@ def process_video(video_uri, output_dir):
         # Grading Round 1
         r_grading_prompts = [PROMPT_1, PROMPT_2]
         cache_name, r_grad_str_1, r_grades_1, r_tok_1 = grading(
-            r_grading_prompts, readiness_rubric, readiness_info, True, 
+            r_grading_prompts, readiness_rubric, readiness_info, None, True, 
             [True] * NUM_READINESS_ITEMS, cache_name, video_uri, credentials, temperature=1.0
         )
         readiness_data["grading_strings_r1"] = r_grad_str_1
@@ -96,7 +97,7 @@ def process_video(video_uri, output_dir):
             print(f"Regrading needed for Readiness items: {[i+1 for i, x in enumerate(r_redos) if x]}")
             r_regrade_prompts = [REGRADER for _ in range(NUM_READINESS_CHUNKS)]
             cache_name, r_grad_str_2, r_grades_2, r_tok_2 = grading(
-                r_regrade_prompts, readiness_rubric, readiness_info, True, 
+                r_regrade_prompts, readiness_rubric, readiness_info, None, True, 
                 r_redos, cache_name, video_uri, credentials, temperature=1.4
             )
             readiness_data["grading_strings_r2"] = r_grad_str_2
@@ -162,8 +163,14 @@ def process_video(video_uri, output_dir):
         print(f"Starting Mastery Phase for {video_uri}")
         
         m_grading_prompts = [PROMPT_3, PROMPT_4, PROMPT_5, PROMPT_6, PROMPT_7, PROMPT_8, PROMPT_9, PROMPT_10, PROMPT_11, PROMPT_12]
+        previous_steps = ["" for _ in range(NUM_MASTERY_CHUNKS)]
+        for i in range(NUM_MASTERY_ITEMS):
+            # add step to each chunk after the one it belongs to
+            for j in range(mastery_item_to_prompt[i] + 1, NUM_MASTERY_CHUNKS):
+                previous_steps[j] += RUBRIC_ITEMS[NUM_READINESS_ITEMS + i] + "\n"
+        
         cache_name, m_grad_str_1, m_grades_1, m_tok_1 = grading(
-            m_grading_prompts, mastery_rubric, mastery_info, False,
+            m_grading_prompts, mastery_rubric, mastery_info, previous_steps, False,
             [True] * NUM_MASTERY_ITEMS, cache_name, video_uri, credentials, temperature=1.0
         )
         mastery_data["grading_strings_r1"] = m_grad_str_1
@@ -188,7 +195,7 @@ def process_video(video_uri, output_dir):
             print(f"Regrading needed for Mastery items: {[i+1 for i, x in enumerate(m_redos) if x]}")
             m_regrade_prompts = [REGRADER for _ in range(NUM_MASTERY_CHUNKS)]
             cache_name, m_grad_str_2, m_grades_2, m_tok_2 = grading(
-                m_regrade_prompts, mastery_rubric, mastery_info, False,
+                m_regrade_prompts, mastery_rubric, mastery_info, previous_steps, False,
                 m_redos, cache_name, video_uri, credentials, temperature=1.4
             )
             mastery_data["grading_strings_r2"] = m_grad_str_2
