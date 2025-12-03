@@ -5,7 +5,7 @@ LOCATION = "global"
 MODEL_NAME = "gemini-2.5-pro"
 BUCKET_NAME = "nightingale-deeprails-vertex-videos"
 VIDEO_TYPE_NAME = "BSN206 Handwashing"
-PROMPT_VERSION = "new_dec2_2"
+PROMPT_VERSION = "new_dec3_1"
 
 # Video Settings
 FPS = 10.0
