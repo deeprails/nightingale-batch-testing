@@ -40,7 +40,7 @@ RUBRIC_ITEMS = [
     # Item 10
     "Has access to unused paper towels",
     # Item 11
-    "Has access to sterile gloves in sterile packaging (and sterile drape/field if used)",
+    "Has access to sterile gloves in sterile packaging",
     # Item 12
     "Has access to hands-free garbage can or a designated garbage area",
     # Item 13
@@ -116,9 +116,9 @@ RUBRIC_ITEMS = [
     # Item 48
     "As the hand pulls out of the glove, the interior of the glove rolls to fold over the soiled outside of the glove",
     # Item 49
-    "Uses still gloved hand to hold the used glove before taking the other off or disposes of the first glove into the trash receptacle or designated waste area immediately.",
+    "Uses still gloved hand to hold the used glove before taking the other off OR disposes of the first glove into the trash receptacle or designated waste area immediately.",
     # Item 50
-    "Place bare fingers inside the glove where wrist meets palm",
+    "Insert a few bare fingers into the glove where wrist meets palm",
     # Item 51
     "Pushing with the inserted fingers, take glove off by folding the inside of the glove over the outside",
     # Item 52
