@@ -23,7 +23,7 @@ RUN_MASTERY_CHUNKS = [2,9]
 NUM_READINESS_CHUNKS = 2
 NUM_MASTERY_CHUNKS = 10
 NUM_READINESS_ITEMS = 12
-NUM_MASTERY_ITEMS = 41
+NUM_MASTERY_ITEMS = 40
 
 # Rubric Items
 RUBRIC_ITEMS = [
@@ -76,7 +76,7 @@ RUBRIC_ITEMS = [
     # Item 24
     "Uses clean paper towel to dry hands",
     # Item 25
-    "Dries hands starting from fingertips and moving to wrists, without skipping any areas or moving from wrists back to the fingertips",
+    "Dries hands completely, without skipping any areas",
     # Item 26
     "Disposes of paper towel without contaminating hands by touching other surfaces",
     # Item 27
@@ -122,16 +122,14 @@ RUBRIC_ITEMS = [
     # Item 47
     "Pulls hand out while maintaining hold on the glove",
     # Item 48
-    "As the hand pulls out of the glove, the interior of the glove rolls to fold over the soiled outside of the glove",
-    # Item 49
     "Uses still gloved hand to hold the used glove before taking the other off OR disposes of the first glove into the trash receptacle or designated waste area immediately.",
-    # Item 50
+    # Item 49
     "Insert a few bare fingers into the glove where wrist meets palm",
-    # Item 51
+    # Item 50
     "Pushing with the inserted fingers, take glove off by folding the inside of the glove over the outside",
-    # Item 52
+    # Item 51
     "If the first glove has not been disposed of, the second glove also rolls over it as part of removal such that the second glove entirely wraps around the first glove",
-    # Item 53
+    # Item 52
     "Discard used gloves in the trash receptacle or designated waste area without touching any other surface"
 ]
 
@@ -140,7 +138,7 @@ readiness_item_to_prompt = [0,0,0,0,0,0,1,1,1,1,1,1]
 mastery_item_to_prompt = [0,0,0,0,0,1,1,1,1,1,2,2,
                           2,2,2,2,3,3,3,4,4,5,5,5,
                           5,6,6,6,6,6,7,7,7,8,8,8,
-                          8,9,9,9,9]
+                          9,9,9,9]
 
 # Rubric Info (Rules & Examples)
 RUBRIC_INFO = [
@@ -247,11 +245,8 @@ RUBRIC_INFO = [
     # Item 51
     "",
     # Item 52
-    "",
-    # Item 53
     ""
 ]
-
 # Prompts
 TIMESTAMP_PROMPT = """
 You are an expert nursing education evaluator. Your job is to review a video of a nursing student demonstrating handwashing & sterile gloving, and create a timeline of key events.
