@@ -59,8 +59,8 @@ def cache_video(video_uri, ttl, credentials):
                     },
                     "videoMetadata": {
                         "fps": FPS, 
-                    }
-                    # "mediaResolution": {"level": "MEDIA_RESOLUTION_HIGH"}
+                    },
+                    "mediaResolution": {"level": "MEDIA_RESOLUTION_HIGH"}
                 },
             ]
         }],

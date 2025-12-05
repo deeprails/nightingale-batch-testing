@@ -2,11 +2,47 @@ import re
 import json
 from src.config import (
     NUM_READINESS_CHUNKS, NUM_MASTERY_CHUNKS, NUM_READINESS_ITEMS, NUM_MASTERY_ITEMS,
-    readiness_item_to_prompt, mastery_item_to_prompt, JUDGE_PROMPT
+    readiness_item_to_prompt, mastery_item_to_prompt, JUDGE_PROMPT, DEFAULT_TEMP,
+    TIMESTAMP_PROMPT
 )
 from src.api import poll_vertex
 
-def assemble_skeleton_prompts(skeletons, items, additional_info, previous_steps, previous_results, assemble_or_not, is_readiness):
+def timestamping(cache_name, video_uri, credentials):
+    """Runs the timestamping phase."""
+    timestamp_schema = {
+        "type": "object",
+        "properties": {
+            "events": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "timestamp": {"type": "string"},
+                        "event": {"type": "string"}
+                    },
+                    "required": ["timestamp", "event"]
+                }
+            }
+        },
+        "required": ["events"]
+    }
+
+    cache_name, responses = poll_vertex([TIMESTAMP_PROMPT], timestamp_schema, cache_name, video_uri, credentials, temperature=DEFAULT_TEMP)
+
+    candidates = responses[0].json().get("candidates", [])
+    if not candidates:
+        raise ValueError("No candidates returned for timestamping")
+        
+    output_text = candidates[0]["content"]["parts"][0]["text"]
+    output_data = json.loads(output_text)
+    
+    events_string = ""
+    for event in output_data["events"]:
+        events_string += f"- {event['timestamp']}: {event['event']}\n"
+        
+    return cache_name, events_string
+
+def assemble_skeleton_prompts(skeletons, items, additional_info, previous_steps, previous_results, assemble_or_not, is_readiness, video_events=None):
     """Assembles the prompts by filling in the skeletons with rubric items."""
     # Validation
     if is_readiness:
@@ -76,12 +112,17 @@ def assemble_skeleton_prompts(skeletons, items, additional_info, previous_steps,
                 prev_target = "{{{PREVIOUS_STEPS}}}"
                 prev_pattern = re.escape(previous_steps[i])
                 filled_skeleton = re.sub(prev_target, prev_pattern, filled_skeleton)
+            
+            if video_events is not None:
+                events_target = "{{{VIDEO_EVENTS}}}"
+                events_pattern = re.escape(video_events)
+                filled_skeleton = re.sub(events_target, events_pattern, filled_skeleton)
                 
             finished_prompts.append(filled_skeleton)
 
     return finished_prompts
 
-def grading(prompts, rubric_items, additional_info, previous_steps, is_readiness, assemble_or_not, cache_name, video_uri, credentials, temperature):
+def grading(prompts, rubric_items, additional_info, previous_steps, is_readiness, assemble_or_not, cache_name, video_uri, credentials, temperature, video_events=None):
     """Runs the grading phase."""
     grading_schema = {
         "type": "object",
@@ -101,7 +142,7 @@ def grading(prompts, rubric_items, additional_info, previous_steps, is_readiness
         "required": ["scores"]
     }
 
-    assembled_prompts = assemble_skeleton_prompts(prompts, rubric_items, additional_info, previous_steps, None, assemble_or_not, is_readiness)
+    assembled_prompts = assemble_skeleton_prompts(prompts, rubric_items, additional_info, previous_steps, None, assemble_or_not, is_readiness, video_events)
     cache_name, responses = poll_vertex(assembled_prompts, grading_schema, cache_name, video_uri, credentials, temperature)
 
     # Process responses
@@ -166,7 +207,7 @@ def grading(prompts, rubric_items, additional_info, previous_steps, is_readiness
 
     return cache_name, grading_result_strings, scores, token_data
 
-def evaluation(prompts, rubric_items, additional_info, grading_strings, is_readiness, assemble_or_not, cache_name, video_uri, credentials):
+def evaluation(prompts, rubric_items, additional_info, grading_strings, is_readiness, assemble_or_not, cache_name, video_uri, credentials, video_events=None):
     """Runs the evaluation phase."""
     eval_schema = {
         "type": "object",
@@ -187,8 +228,8 @@ def evaluation(prompts, rubric_items, additional_info, grading_strings, is_readi
         "required": ["verdicts"]
     }
 
-    eval_prompts = assemble_skeleton_prompts(prompts, rubric_items, additional_info, None, grading_strings, assemble_or_not, is_readiness)
-    cache_name, responses = poll_vertex(eval_prompts, eval_schema, cache_name, video_uri, credentials, temperature=1.0)
+    eval_prompts = assemble_skeleton_prompts(prompts, rubric_items, additional_info, None, grading_strings, assemble_or_not, is_readiness, video_events)
+    cache_name, responses = poll_vertex(eval_prompts, eval_schema, cache_name, video_uri, credentials, temperature=DEFAULT_TEMP)
 
     eval_verdicts = []
     for response in responses:
@@ -239,16 +280,18 @@ def evaluation(prompts, rubric_items, additional_info, grading_strings, is_readi
 
     return cache_name, eval_strings, agreements, token_data
 
-def assemble_judge(item, g1, e1, g2, e2, info):
+def assemble_judge(item, g1, e1, g2, e2, info, video_events=None):
     filled = re.sub("{{{RUBRIC_ITEM}}}", re.escape(item), JUDGE_PROMPT)
     filled = re.sub("{{{GRADER_1_OUTPUT}}}", re.escape(g1), filled)
     filled = re.sub("{{{EVALUATOR_1_OUTPUT}}}", re.escape(e1), filled)
     filled = re.sub("{{{GRADER_2_OUTPUT}}}", re.escape(g2), filled)
     filled = re.sub("{{{EVALUATOR_2_OUTPUT}}}", re.escape(e2), filled)
     filled = re.sub("{{{INFO}}}", re.escape(info), filled)
+    if video_events:
+        filled = re.sub("{{{VIDEO_EVENTS}}}", re.escape(video_events), filled)
     return filled
 
-def judge(cache_name, item, g1, e1, g2, e2, info, video_uri, credentials):
+def judge(cache_name, item, g1, e1, g2, e2, info, video_uri, credentials, video_events=None):
     """Runs the judge phase."""
     judge_schema = {
         "type": "object",
@@ -259,8 +302,8 @@ def judge(cache_name, item, g1, e1, g2, e2, info, video_uri, credentials):
         "required": ["score", "rationale"]
     }
     
-    prompt = assemble_judge(item, g1, e1, g2, e2, info)
-    cache_name, responses = poll_vertex([prompt], judge_schema, cache_name, video_uri, credentials, temperature=1.0)
+    prompt = assemble_judge(item, g1, e1, g2, e2, info, video_events)
+    cache_name, responses = poll_vertex([prompt], judge_schema, cache_name, video_uri, credentials, temperature=DEFAULT_TEMP)
     
     judge_json = responses[0].json()
     metadata = judge_json.get("usageMetadata", {})
@@ -274,4 +317,3 @@ def judge(cache_name, item, g1, e1, g2, e2, info, video_uri, credentials):
     judge_string = f"Judge gave a final score of {judge_data['score']} with the following rationale: {judge_data['rationale']}"
     
     return cache_name, judge_string, judge_data["score"], judge_data["rationale"], tokens
-

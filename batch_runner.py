@@ -11,10 +11,11 @@ from src.config import (
     EVALUATOR, REGRADER,
     NUM_READINESS_CHUNKS, NUM_MASTERY_CHUNKS, TTL_SECONDS,
     PROMPT_VERSION, MODEL_NAME,
+    DEFAULT_TEMP, REGRADE_TEMP,
     mastery_item_to_prompt
 )
 from src.api import get_credentials, cache_video
-from src.workflow import grading, evaluation, judge
+from src.workflow import grading, evaluation, judge, timestamping
 
 def process_video(video_uri, output_dir):
     """
@@ -32,6 +33,11 @@ def process_video(video_uri, output_dir):
         cache_resp = cache_video(video_uri, TTL_SECONDS, credentials)
         cache_name = cache_resp.json()["name"]
         print(f"Cached {video_uri} as {cache_name}")
+        
+        # 2. Timestamping
+        print(f"Timestamping video {video_uri}...")
+        cache_name, events_string = timestamping(cache_name, video_uri, credentials)
+        print(f"Video events identified.")
         
         # Initialize Result Containers
         all_readiness_grades = [[None, None, None] for _ in range(NUM_READINESS_ITEMS)]
@@ -73,7 +79,8 @@ def process_video(video_uri, output_dir):
         r_grading_prompts = [PROMPT_1, PROMPT_2]
         cache_name, r_grad_str_1, r_grades_1, r_tok_1 = grading(
             r_grading_prompts, readiness_rubric, readiness_info, None, True, 
-            [True] * NUM_READINESS_ITEMS, cache_name, video_uri, credentials, temperature=1.0
+            [True] * NUM_READINESS_ITEMS, cache_name, video_uri, credentials, 
+            temperature=DEFAULT_TEMP, video_events=events_string
         )
         readiness_data["grading_strings_r1"] = r_grad_str_1
         readiness_data["grading_tokens_r1"] = r_tok_1
@@ -82,11 +89,11 @@ def process_video(video_uri, output_dir):
             all_readiness_grades[i][0] = g
 
         # Evaluation Round 1
-        proceeds = [g != "Pass" for g in r_grades_1]
+        proceeds = [True for _ in range(NUM_READINESS_ITEMS)] # strict architecture
         r_eval_prompts = [EVALUATOR for _ in range(NUM_READINESS_CHUNKS)]
         cache_name, r_eval_str_1, r_agreements_1, r_eval_tok_1 = evaluation(
             r_eval_prompts, readiness_rubric, readiness_info, r_grad_str_1, True, 
-            proceeds, cache_name, video_uri, credentials
+            proceeds, cache_name, video_uri, credentials, video_events=events_string
         )
         readiness_data["eval_strings_r1"] = r_eval_str_1
         readiness_data["eval_tokens_r1"] = r_eval_tok_1
@@ -98,7 +105,8 @@ def process_video(video_uri, output_dir):
             r_regrade_prompts = [REGRADER for _ in range(NUM_READINESS_CHUNKS)]
             cache_name, r_grad_str_2, r_grades_2, r_tok_2 = grading(
                 r_regrade_prompts, readiness_rubric, readiness_info, None, True, 
-                r_redos, cache_name, video_uri, credentials, temperature=1.4
+                r_redos, cache_name, video_uri, credentials, 
+                temperature=REGRADE_TEMP, video_events=events_string
             )
             readiness_data["grading_strings_r2"] = r_grad_str_2
             readiness_data["grading_tokens_r2"] = r_tok_2
@@ -108,14 +116,14 @@ def process_video(video_uri, output_dir):
             for i, g in enumerate(r_grades_2):
                 if r_redos[i]:
                     all_readiness_grades[i][1] = g
-                    r_proceeds_2.append(g != "Pass")
+                    r_proceeds_2.append(True)
                 else:
                     r_proceeds_2.append(False)
 
             # Evaluation Round 2
             cache_name, r_eval_str_2, r_agreements_2, r_eval_tok_2 = evaluation(
                 r_eval_prompts, readiness_rubric, readiness_info, r_grad_str_2, True,
-                r_proceeds_2, cache_name, video_uri, credentials
+                r_proceeds_2, cache_name, video_uri, credentials, video_events=events_string
             )
             readiness_data["eval_strings_r2"] = r_eval_str_2
             readiness_data["eval_tokens_r2"] = r_eval_tok_2
@@ -130,7 +138,7 @@ def process_video(video_uri, output_dir):
                         r_grad_str_1[i], r_eval_str_1[i],
                         r_grad_str_2[i], r_eval_str_2[i],
                         readiness_info[i],
-                        video_uri, credentials
+                        video_uri, credentials, video_events=events_string
                     )
                     all_readiness_grades[i][2] = j_score
                     readiness_data["judge_strings"][i] = j_str
@@ -171,7 +179,8 @@ def process_video(video_uri, output_dir):
         
         cache_name, m_grad_str_1, m_grades_1, m_tok_1 = grading(
             m_grading_prompts, mastery_rubric, mastery_info, previous_steps, False,
-            [True] * NUM_MASTERY_ITEMS, cache_name, video_uri, credentials, temperature=1.0
+            [True] * NUM_MASTERY_ITEMS, cache_name, video_uri, credentials, 
+            temperature=DEFAULT_TEMP, video_events=events_string
         )
         mastery_data["grading_strings_r1"] = m_grad_str_1
         mastery_data["grading_tokens_r1"] = m_tok_1
@@ -180,11 +189,11 @@ def process_video(video_uri, output_dir):
             all_mastery_grades[i][0] = g
         
         # Evaluation Round 1
-        m_proceeds = [g != "Pass" for g in m_grades_1]
+        m_proceeds = [True for _ in range(NUM_MASTERY_ITEMS)]
         m_eval_prompts = [EVALUATOR for _ in range(NUM_MASTERY_CHUNKS)]
         cache_name, m_eval_str_1, m_agreements_1, m_eval_tok_1 = evaluation(
             m_eval_prompts, mastery_rubric, mastery_info, m_grad_str_1, False,
-            m_proceeds, cache_name, video_uri, credentials
+            m_proceeds, cache_name, video_uri, credentials, video_events=events_string
         )
         mastery_data["eval_strings_r1"] = m_eval_str_1
         mastery_data["eval_tokens_r1"] = m_eval_tok_1
@@ -196,7 +205,8 @@ def process_video(video_uri, output_dir):
             m_regrade_prompts = [REGRADER for _ in range(NUM_MASTERY_CHUNKS)]
             cache_name, m_grad_str_2, m_grades_2, m_tok_2 = grading(
                 m_regrade_prompts, mastery_rubric, mastery_info, previous_steps, False,
-                m_redos, cache_name, video_uri, credentials, temperature=1.4
+                m_redos, cache_name, video_uri, credentials, 
+                temperature=REGRADE_TEMP, video_events=events_string
             )
             mastery_data["grading_strings_r2"] = m_grad_str_2
             mastery_data["grading_tokens_r2"] = m_tok_2
@@ -205,14 +215,14 @@ def process_video(video_uri, output_dir):
             for i, g in enumerate(m_grades_2):
                 if m_redos[i]:
                     all_mastery_grades[i][1] = g
-                    m_proceeds_2.append(g != "Pass")
+                    m_proceeds_2.append(True)
                 else:
                     m_proceeds_2.append(False)
                     
             # Evaluation Round 2
             cache_name, m_eval_str_2, m_agreements_2, m_eval_tok_2 = evaluation(
                 m_eval_prompts, mastery_rubric, mastery_info, m_grad_str_2, False,
-                m_proceeds_2, cache_name, video_uri, credentials
+                m_proceeds_2, cache_name, video_uri, credentials, video_events=events_string
             )
             mastery_data["eval_strings_r2"] = m_eval_str_2
             mastery_data["eval_tokens_r2"] = m_eval_tok_2
@@ -228,7 +238,7 @@ def process_video(video_uri, output_dir):
                         m_grad_str_1[i], m_eval_str_1[i],
                         m_grad_str_2[i], m_eval_str_2[i],
                         mastery_info[i],
-                        video_uri, credentials
+                        video_uri, credentials, video_events=events_string
                     )
                     all_mastery_grades[i][2] = j_score
                     mastery_data["judge_strings"][i] = j_str

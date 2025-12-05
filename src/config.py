@@ -1,8 +1,7 @@
-
 # Project Configuration
 PROJECT_ID = "nightingale-deeprails"
 LOCATION = "global"
-MODEL_NAME = "gemini-2.5-pro"
+MODEL_NAME = "gemini-3-pro-preview"
 BUCKET_NAME = "nightingale-deeprails-vertex-videos"
 VIDEO_TYPE_NAME = "BSN206 Handwashing"
 PROMPT_VERSION = "new_dec3_1"
@@ -10,6 +9,8 @@ PROMPT_VERSION = "new_dec3_1"
 # Video Settings
 FPS = 10.0
 TTL_SECONDS = 2400.0  # 40 minutes
+DEFAULT_TEMP = 0.5
+REGRADE_TEMP = 0.7
 
 # Logic Constants
 NUM_READINESS_CHUNKS = 2
@@ -20,17 +21,17 @@ NUM_MASTERY_ITEMS = 41
 # Rubric Items
 RUBRIC_ITEMS = [
     # Item 1
-    "Wore a Nightingale College uniform",
+    "Wore a Nightingale College uniform (grey scrubs with a Nightingale logo on the chest)",
     # Item 2
     "Wore a Nightingale College ID visible on their shirt",
     # Item 3
-    "Wore their hair such that it is pulled away from their face",
+    "Wore their hair such that it is not obstructing their face",
     # Item 4
     "Wore no jewelry anywhere on their hands",
     # Item 5
     "Wore no jewelry on their wrists or arms",
     # Item 6
-    "Kept fingernail length short (<1mm beyond end of finger)",
+    "Kept fingernails short, natural, and free of polish",
     # Item 7
     "Demonstration area is relatively clean and clear (e.g. no substances or objects within 18 inches of gloving supplies that aren't being used in the demonstration)",
     # Item 8
@@ -68,7 +69,7 @@ RUBRIC_ITEMS = [
     # Item 24
     "Uses clean paper towel to dry hands",
     # Item 25
-    "Dries hands generally from fingertips to wrists",
+    "Dries hands starting from fingertips and moving to wrists, without skipping any areas or reversing direction",
     # Item 26
     "Disposes of paper towel without contaminating hands by touching other surfaces",
     # Item 27
@@ -106,7 +107,7 @@ RUBRIC_ITEMS = [
     # Item 43
     "Keeps hands at or above the waist area for the majority of the time after donning both gloves",
     # Item 44
-    "Grabs middle, sterile area of the used glove wrapper with one gloved hand to discard",
+    "Grabs middle, sterile area of the used inner glove wrapper with one gloved hand to discard",
     # Item 45
     "Discards used inner wrapper of glove packaging into trash receptacle or designated waste area without touching any other surface",
     # Item 46
@@ -151,15 +152,15 @@ RUBRIC_INFO = [
     #  Item 7
     "### Rules\n - If there's items that can't be moved near the work area, don't fail the student.",
     # Item 8
-    "### Rules\n - Note that some items may be obscured or out of frame; you should use visual and audio clues to make an informed judgment. Lean towards the student meeting the criteria if there is any doubt.",
+    "### Rules\n - Note that some items may be obscured or out of frame; you should use visual and audio clues to make an informed judgment.",
     # Item 9
-    "### Rules\n - Note that some items may be obscured or out of frame; you should use visual and audio clues to make an informed judgment. Lean towards the student meeting the criteria if there is any doubt.",
+    "### Rules\n - Note that some items may be obscured or out of frame; you should use visual and audio clues to make an informed judgment.",
     # Item 10
-    "### Rules\n - Note that some items may be obscured or out of frame; you should use visual and audio clues to make an informed judgment. Lean towards the student meeting the criteria if there is any doubt.",
+    "### Rules\n - Note that some items may be obscured or out of frame; you should use visual and audio clues to make an informed judgment.",
     # Item 11
-    "### Rules\n - Note that some items may be obscured or out of frame; you should use visual and audio clues to make an informed judgment. Lean towards the student meeting the criteria if there is any doubt.",
+    "### Rules\n - Note that some items may be obscured or out of frame; you should use visual and audio clues to make an informed judgment.",
     # Item 12
-    "### Rules\n - Note that some items may be obscured or out of frame; you should use visual and audio clues to make an informed judgment. Lean towards the student meeting the criteria if there is any doubt.",
+    "### Rules\n - Note that some items may be obscured or out of frame; you should use visual and audio clues to make an informed judgment.",
     # Item 13
     "### Rules\n - Verbalization of any of these rubric items is not a sufficient replacement for performing them. If the student only talks about and/or mimes the action, do not give them credit.\n - Listen to audio cues to be sure the water is turned on.",
     # Item 14
@@ -207,7 +208,7 @@ RUBRIC_INFO = [
     # Item 35
     "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the one item closest to the sterility break.\n - Do not identify the student's hands as left or right. If you refer to the hands, say \"the first hand\" or \"the second hand\".",
     # Item 36
-    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the one item closest to the sterility break.\n - Do not identify the student's hands as left or right. If you refer to the hands, say \"the first hand\" or \"the second hand\".",
+    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the one item closest to the sterility break.\n - Do not identify the student's hands as left or right. If you refer to the hands, say \"the first hand\" or \"the second hand\".\n - The student should have the gloves pulled all the way on; there should be no space left at the ends of fingers.",
     # Item 37
     "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the one item closest to the sterility break.\n - Do not identify the student's hands as left or right. If you refer to the hands, say \"the first hand\" or \"the second hand\".",
     # Item 38
@@ -217,7 +218,7 @@ RUBRIC_INFO = [
     # Item 40
     "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the one item closest to the sterility break.\n - Do not identify the student's hands as left or right. If you refer to the hands, say \"the first hand\" or \"the second hand\".",
     # Item 41
-    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the one item closest to the sterility break.\n - Do not identify the student's hands as left or right. If you refer to the hands, say \"the first hand\" or \"the second hand\".",
+    "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the one item closest to the sterility break.\n - Do not identify the student's hands as left or right. If you refer to the hands, say \"the first hand\" or \"the second hand\".\n - The student should have the gloves pulled all the way on; there should be no space left at the ends of fingers.",
     # Item 42
     "### Rules\n - If, at any point while putting on or wearing the gloves, the folded cuff rolls such that the exterior surface of the glove instead of the fold touches skin, that is a break in sterility. The student cannot earn points for the one item closest to the sterility break.\n - Do not identify the student's hands as left or right. If you refer to the hands, say \"the first hand\" or \"the second hand\".",
     # Item 43
@@ -245,12 +246,34 @@ RUBRIC_INFO = [
 ]
 
 # Prompts
+TIMESTAMP_PROMPT = """
+You are an expert nursing education evaluator. Your job is to review a video of a nursing student demonstrating handwashing & sterile gloving, and create a timeline of key events.
+
+### Instructions
+1. Watch the video carefully from start to finish.
+2. Identify the timestamps for key events in the process, such as drying hands, opening glove package, etc.
+3. Do not evaluate the quality of the performance. Focus only on WHAT happened and WHEN.
+4. Output a JSON object with a list of events, each having a timestamp (e.g., "00:15") and a brief description.
+
+Example Output:
+{
+  "events": [
+    {"timestamp": "00:05", "event": "Turns on sink water"},
+    {"timestamp": "00:10", "event": "Wets hands"},
+    ...
+  ]
+}
+"""
+
 PROMPT_1 = """
 You are an expert nursing education evaluator. Your job is to review a video of a nursing student demonstrating handwashing & sterile gloving, and then evaluate several specific details of their preparation for the task.
 
 ### Readiness Criteria
 You will be evaluating whether or not the student did six things properly:
 {{{RUBRIC_ITEMS}}}
+
+### Video Events
+{{{VIDEO_EVENTS}}}
 
 ### Steps
 1. Read the Rules section below, being sure to understand them completely and keep them in mind during your evaluation.
@@ -271,6 +294,9 @@ You are an expert nursing education evaluator. Your job is to review a video of 
 You will be evaluating whether or not the student prepared six things properly:
 {{{RUBRIC_ITEMS}}}
 
+### Video Events
+{{{VIDEO_EVENTS}}}
+
 ### Steps
 1. Read the Rules section below, being sure to understand them completely and keep them in mind during your evaluation.
 2. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
@@ -290,6 +316,9 @@ You are an expert nursing education evaluator. Your job is to review a video of 
 You will be evaluating whether or not the student completed five components of handwashing properly:
 {{{RUBRIC_ITEMS}}}
 
+### Video Events
+{{{VIDEO_EVENTS}}}
+
 ### Steps
 1. Read the Rules section below, being sure to understand them completely and keep them in mind during your evaluation.
 2. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
@@ -308,6 +337,9 @@ You are an expert nursing education evaluator. Your job is to review a video of 
 ### Skill Mastery Criteria
 You will be evaluating whether or not the student completed five components of handwashing properly:
 {{{RUBRIC_ITEMS}}}
+
+### Video Events
+{{{VIDEO_EVENTS}}}
 
 ### Previous Steps
 {{{PREVIOUS_STEPS}}}
@@ -331,6 +363,9 @@ You are an expert nursing education evaluator. Your job is to review a video of 
 ### Skill Mastery Criteria
 You will be evaluating whether or not the student completed six components of handwashing properly:
 {{{RUBRIC_ITEMS}}}
+
+### Video Events
+{{{VIDEO_EVENTS}}}
 
 ### Previous Steps
 {{{PREVIOUS_STEPS}}}
@@ -358,6 +393,9 @@ Sterile gloves have a cuff folded such that some of the nonsterile interior is e
 You will be evaluating whether or not the student completed three components of gloving properly:
 {{{RUBRIC_ITEMS}}}
 
+### Video Events
+{{{VIDEO_EVENTS}}}
+
 ### Previous Steps
 {{{PREVIOUS_STEPS}}}
 
@@ -383,6 +421,9 @@ Sterile gloves have a cuff folded such that some of the nonsterile interior is e
 ### Skill Mastery Criteria
 You will be evaluating whether or not the student completed two components of gloving properly:
 {{{RUBRIC_ITEMS}}}
+
+### Video Events
+{{{VIDEO_EVENTS}}}
 
 ### Previous Steps
 {{{PREVIOUS_STEPS}}}
@@ -410,6 +451,9 @@ Sterile gloves have a cuff folded such that some of the nonsterile interior is e
 You will be evaluating whether or not the student completed four components of gloving properly:
 {{{RUBRIC_ITEMS}}}
 
+### Video Events
+{{{VIDEO_EVENTS}}}
+
 ### Previous Steps
 {{{PREVIOUS_STEPS}}}
 
@@ -435,6 +479,9 @@ Sterile gloves have a cuff folded such that some of the nonsterile interior is e
 ### Skill Mastery Criteria
 You will be evaluating whether or not the student completed five components of gloving properly:
 {{{RUBRIC_ITEMS}}}
+
+### Video Events
+{{{VIDEO_EVENTS}}}
 
 ### Previous Steps
 {{{PREVIOUS_STEPS}}}
@@ -462,6 +509,9 @@ Sterile gloves have a cuff folded such that some of the nonsterile interior is e
 You will be evaluating whether or not the student completed three components of gloving properly:
 {{{RUBRIC_ITEMS}}}
 
+### Video Events
+{{{VIDEO_EVENTS}}}
+
 ### Previous Steps
 {{{PREVIOUS_STEPS}}}
 
@@ -487,6 +537,9 @@ Sterile gloves have a cuff folded such that some of the nonsterile interior is e
 ### Skill Mastery Criteria
 You will be evaluating whether or not the student completed four components of gloving properly:
 {{{RUBRIC_ITEMS}}}
+
+### Video Events
+{{{VIDEO_EVENTS}}}
 
 ### Previous Steps
 {{{PREVIOUS_STEPS}}}
@@ -514,6 +567,9 @@ Sterile gloves have a cuff folded such that some of the nonsterile interior is e
 You will be evaluating whether or not the student completed four components of gloving properly:
 {{{RUBRIC_ITEMS}}}
 
+### Video Events
+{{{VIDEO_EVENTS}}}
+
 ### Previous Steps
 {{{PREVIOUS_STEPS}}}
 
@@ -530,25 +586,31 @@ You will be evaluating whether or not the student completed four components of g
 """
 
 EVALUATOR = """
-You are an expert nursing education evaluator who checks the work of nursing education graders. Your job is to review a video of a nursing student demonstrating a specific skill, and then evaluate specific components of the task independently and compare them to the grader’s assessment.
+You are an expert nursing education evaluator who checks the work of nursing education graders. Your job is to review a video of a nursing student demonstrating a specific skill, and check to be sure that the grader did not make any errors in its evaluation.
+
+The grader is very effective and trustworthy for the most part, but struggles with some specific issues. It will sometimes assert that something has happened when it hasn't or miss something that did occur. Be sure to check each statement it makes by checking the video. Do not assume that it is correct, but also do not assume it is wrong; it is correct a majority of the time.
 
 ### Rubric Items
 You will be evaluating the following items:
 {{{RUBRIC_ITEMS}}}
+
+### Video Events
+{{{VIDEO_EVENTS}}}
 
 ### Grader’s Assessment
 The grader’s assessment for these items is as follows:
 {{{PREVIOUS_RESULTS}}}
 
 ### Steps
-1. Read the section below, being sure to understand the information completely and keep it in mind during your evaluation.
-2. Watch the video and evaluate each rubric item independent of the grader, forming your own judgment for whether the student successfully met that item.
+1. Read the section below, being sure to understand the information completely and how the evaluation of these rubric items should be done.
+2. Watch the video without considering the grader's assessment in order to form your own judgment for whether the student successfully met that item.
+3. Then, watch the video again while considering the grader's assessment in order to determine whether you agree with the grader's original score and rationale.
 3. For each rubric item, determine whether you agree with the grader’s original score, thinking step by step.
-4. For each rubric item, determine whether the grader's original rationale is correct and well written.
+4. For each rubric item, determine whether each detail in the grader's original rationale is correct and well written.
 5. For each item, output:
    - `score_verdict`: **True** if you agree with the grader’s score for this item, or **False** if you do not.
-   - `rationale_verdict`: **True** if you agree with the grader’s rationale for this item, or **False** if you do not.
-   - `reasoning`: A clear, detailed explanation of your chain of thought reasoning (including why you agree or disagree with the grader on that item). Cite specific visual and/or audio evidence to support your reasoning.
+   - `rationale_verdict`: **True** if you approve of the grader’s rationale for this item, or **False** if you do not.
+   - `reasoning`: A clear, detailed explanation of your chain of thought reasoning (including why you agree or disagree with the grader on that item). Cite specific visual and/or audio evidence directly from the video to support your reasoning.
 
 {{{INFO}}}
 """
@@ -559,6 +621,9 @@ You are an expert nursing education evaluator. Your job is to review a video of 
 ### Rubric Items Needing Re-evaluation
 An evaluator disagreed with the original grader on the following items:
 {{{RUBRIC_ITEMS}}}
+
+### Video Events
+{{{VIDEO_EVENTS}}}
 
 ### Previous Steps
 {{{PREVIOUS_STEPS}}}
@@ -600,6 +665,9 @@ Round 1 Grader: {{{GRADER_1_OUTPUT}}}
 Round 1 Evaluator: {{{EVALUATOR_1_OUTPUT}}}
 Round 2 Regrader: {{{GRADER_2_OUTPUT}}}
 Round 2 Evaluator: {{{EVALUATOR_2_OUTPUT}}}
+
+4. Video Timeline:
+{{{VIDEO_EVENTS}}}
 
 ## Instructions
 Analyze the Rubric: deeply understand the specific criteria required for a passing score.

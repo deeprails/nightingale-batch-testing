@@ -1,4 +1,5 @@
 results/
+results_3_pro/
 # src/config.py
 service_account.json
 __pycache__/
