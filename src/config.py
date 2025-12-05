@@ -33,7 +33,7 @@ RUBRIC_ITEMS = [
     # Item 6
     "Kept fingernails short, natural, and free of polish",
     # Item 7
-    "Demonstration area is relatively clean and clear (e.g. no substances or objects within 18 inches of gloving supplies that aren't being used in the demonstration)",
+    "Has access to a clean, dry demonstration area for donning gloves, such as a dry countertop or a separate table",
     # Item 8
     "Has access to a sink with running water",
     # Item 9
@@ -55,7 +55,7 @@ RUBRIC_ITEMS = [
     # Item 17
     "Dispenses small amount of hand soap onto wet hands (may use a hands free dispenser) and/or demonstrates soap was applied with visible lather",
     # Item 18
-    "Points fingers and arms downward into the sink most of the time while washing hands. Arm and hand positioning should ensure water can flow down their hands most of the time.",
+    "Points fingers and arms downward into the sink most of the time while washing hands. Arm and hand positioning should ensure water can flow down their hands.",
     # Item 19
     "Washes all areas of both hands, including between fingers and under nails, for at least 15 seconds",
     # Item 20
@@ -69,7 +69,7 @@ RUBRIC_ITEMS = [
     # Item 24
     "Uses clean paper towel to dry hands",
     # Item 25
-    "Dries hands starting from fingertips and moving to wrists, without skipping any areas or reversing direction",
+    "Dries hands starting from fingertips and moving to wrists, without skipping any areas or moving from wrists back to the fingertips",
     # Item 26
     "Disposes of paper towel without contaminating hands by touching other surfaces",
     # Item 27
@@ -81,11 +81,11 @@ RUBRIC_ITEMS = [
     # Item 30
     "Touches only the sterile glove outer wrapper when opening it.",
     # Item 31
-    "Places or gently drops the inner wrapper onto the clear, clean surface. The student should only touch the sterile glove outer wrapper while completing this step.",
+    "Places or gently drops the inner wrapper containing the gloves onto the clear, clean surface. The student should only touch the sterile glove outer wrapper while completing this step.",
     # Item 32
-    "Opens the inner wrapper of the sterile glove package and establishes sterile field such that it is not touching or overlapping other surfaces",
+    "Opens the inner wrapper of the sterile glove package and establishes sterile field by completely unfolding the inner wrapper. The wrapper should not rest on other objectsor hang over edges of the table or sink basin.",
     # Item 33
-    "Opens inner sterile wrapper by touching only the 1-inch folded margin edge",
+    "Opens inner sterile wrapper by touching only the 1-inch folded margin on the outer edge of the wrapper",
     # Item 34
     "With one hand, picks up the glove for the other hand by pinching the folded, nonsterile cuff of the glove with bare fingers",
     # Item 35
@@ -105,9 +105,9 @@ RUBRIC_ITEMS = [
     # Item 42
     "Body of glove covers the entire second gloved hand to the wrist and the rest of the lower arm remains unobstructed by shirt sleeves",
     # Item 43
-    "Keeps hands at or above the waist area for the majority of the time after donning both gloves",
+    "Keeps hands at or above the waist area for the majority of the time after donning both gloves to avoid brushing against nonsterile surfaces",
     # Item 44
-    "Grabs middle, sterile area of the used inner glove wrapper with one gloved hand to discard",
+    "Grabs middle, sterile area of the used inner wrapper that held the gloves with one gloved hand to discard",
     # Item 45
     "Discards used inner wrapper of glove packaging into trash receptacle or designated waste area without touching any other surface",
     # Item 46
@@ -162,39 +162,39 @@ RUBRIC_INFO = [
     # Item 12
     "### Rules\n - Note that some items may be obscured or out of frame; you should use visual and audio clues to make an informed judgment.",
     # Item 13
-    "### Rules\n - Verbalization of any of these rubric items is not a sufficient replacement for performing them. If the student only talks about and/or mimes the action, do not give them credit.\n - Listen to audio cues to be sure the water is turned on.",
+    "### Rules\n - If the student talks about and/or mimes the action instead of performing it, give them a **Not Demonstrated** score.\n - Listen to audio cues to be sure the water is turned on.",
     # Item 14
-    "### Rules\n - Verbalization of any of these rubric items is not a sufficient replacement for performing them. If the student only talks about and/or mimes the action, do not give them credit.\n - Listen to audio cues to be sure the water is turned on.",
+    "### Rules\n - If the student talks about and/or mimes the action instead of performing it, give them a **Not Demonstrated** score.\n - Listen to audio cues to be sure the water is turned on.",
     # Item 15
-    "### Rules\n - Verbalization of any of these rubric items is not a sufficient replacement for performing them. If the student only talks about and/or mimes the action, do not give them credit.\n - Listen to audio cues to be sure the water is turned on.",
+    "### Rules\n - If the student talks about and/or mimes the action instead of performing it, give them a **Not Demonstrated** score.\n - Listen to audio cues to be sure the water is turned on.",
     # Item 16
-    "### Rules\n - Verbalization of any of these rubric items is not a sufficient replacement for performing them. If the student only talks about and/or mimes the action, do not give them credit.\n - Listen to audio cues to be sure the water is turned on.",
+    "### Rules\n - If the student talks about and/or mimes the action instead of performing it, give them a **Not Demonstrated** score.\n - Listen to audio cues to be sure the water is turned on.",
     # Item 17
-    "### Rules\n - Verbalization of any of these rubric items is not a sufficient replacement for performing them. If the student only talks about and/or mimes the action, do not give them credit.\n - Listen to audio cues to be sure the water is turned on.",
+    "### Rules\n - If the student talks about and/or mimes the action instead of performing it, give them a **Not Demonstrated** score.\n - Listen to audio cues to be sure the water is turned on.\n - The student must apply soap after wetting their hands.",
     # Item 18
-    "### Rules\n - Verbalization of any of these rubric items is not a sufficient replacement for performing them. If the student only talks about and/or mimes the action, do not give them credit.\n - Listen to audio cues to be sure the water is turned on.",
+    "### Rules\n - If the student talks about and/or mimes the action instead of performing it, give them a **Not Demonstrated** score.\n - Listen to audio cues to be sure the water is turned on.",
     # Item 19
-    "### Rules\n - Verbalization of any of these rubric items is not a sufficient replacement for performing them. If the student only talks about and/or mimes the action, do not give them credit.\n - Listen to audio cues to be sure the water is turned on.",
+    "### Rules\n - If the student talks about and/or mimes the action instead of performing it, give them a **Not Demonstrated** score.\n - Listen to audio cues to be sure the water is turned on.",
     # Item 20
-    "### Rules\n - Verbalization of any of these rubric items is not a sufficient replacement for performing them. If the student only talks about and/or mimes the action, do not give them credit.\n - Listen to audio cues to be sure the water is turned on.",
+    "### Rules\n - If the student talks about and/or mimes the action instead of performing it, give them a **Not Demonstrated** score.\n - Listen to audio cues to be sure the water is turned on.",
     # Item 21
-    "### Rules\n - Verbalization of any of these rubric items is not a sufficient replacement for performing them. If the student only talks about and/or mimes the action, do not give them credit.\n - Listen to audio cues to be sure the water is turned on.",
+    "### Rules\n - If the student talks about and/or mimes the action instead of performing it, give them a **Not Demonstrated** score.\n - Listen to audio cues to be sure the water is turned on.",
     # Item 22
-    "### Rules\n - Verbalization of any of these rubric items is not a sufficient replacement for performing them. If the student only talks about and/or mimes the action, do not give them credit.\n - Listen to audio cues to be sure the water is turned on.",
+    "### Rules\n - If the student talks about and/or mimes the action instead of performing it, give them a **Not Demonstrated** score.\n - Listen to audio cues to be sure the water is turned on.",
     # Item 23
-    "### Rules\n - Verbalization of any of these rubric items is not a sufficient replacement for performing them. If the student only talks about and/or mimes the action, do not give them credit.",
+    "### Rules\n - If the student talks about and/or mimes the action instead of performing it, give them a **Not Demonstrated** score.",
     # Item 24
-    "### Rules\n - Verbalization of any of these rubric items is not a sufficient replacement for performing them. If the student only talks about and/or mimes the action, do not give them credit.",
+    "### Rules\n - If the student talks about and/or mimes the action instead of performing it, give them a **Not Demonstrated** score.",
     # Item 25
-    "### Rules\n - Verbalization of any of these rubric items is not a sufficient replacement for performing them. If the student only talks about and/or mimes the action, do not give them credit.\n - Moving from wrists back to the fingertips is a violation.",
+    "### Rules\n - If the student talks about and/or mimes the action instead of performing it, give them a **Not Demonstrated** score.",
     # Item 26
-    "### Rules\n - Verbalization of any of these rubric items is not a sufficient replacement for performing them. If the student only talks about and/or mimes the action, do not give them credit.",
+    "### Rules\n - If the student talks about and/or mimes the action instead of performing it, give them a **Not Demonstrated** score.",
     # Item 27
-    "### Rules\n - Verbalization of any of these rubric items is not a sufficient replacement for performing them. If the student only talks about and/or mimes the action, do not give them credit.",
+    "### Rules\n - If the student talks about and/or mimes the action instead of performing it, give them a **Not Demonstrated** score.",
     # Item 28
-    "### Rules\n - Verbalization of any of these rubric items is not a sufficient replacement for performing them. If the student only talks about and/or mimes the action, do not give them credit.",
+    "### Rules\n - If the student talks about and/or mimes the action instead of performing it, give them a **Not Demonstrated** score.",
     # Item 29
-    "### Rules\n - Verbalization of any of these rubric items is not a sufficient replacement for performing them. If the student only talks about and/or mimes the action, do not give them credit.\n - For the purposes of the video, the student touching the recording device to transition is not a break in sterility.",
+    "### Rules\n - If the student talks about and/or mimes the action instead of performing it, give them a **Not Demonstrated** score.\n - For the purposes of the video, the student touching the recording device to transition is not a break in sterility.",
     # Item 30
     "### Rules\n - Students may have practiced with this glove package, so it may be opened already. However, both the outer plastic wrapper and inner wax paper wrapper must be present and repackaged as best as possible. The student cannot earn points related to the outer package if it's not present.",
     # Item 31
