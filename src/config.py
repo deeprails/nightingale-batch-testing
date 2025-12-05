@@ -1,16 +1,23 @@
 # Project Configuration
 PROJECT_ID = "nightingale-deeprails"
 LOCATION = "global"
-MODEL_NAME = "gemini-3-pro-preview"
+MODEL_NAME = "gemini-2.5-pro"
 BUCKET_NAME = "nightingale-deeprails-vertex-videos"
 VIDEO_TYPE_NAME = "BSN206 Handwashing"
-PROMPT_VERSION = "new_dec3_1"
+PROMPT_VERSION = "new_dec5_1"
 
 # Video Settings
 FPS = 10.0
 TTL_SECONDS = 2400.0  # 40 minutes
 DEFAULT_TEMP = 0.5
 REGRADE_TEMP = 0.7
+
+# Testing Configuration
+# Set to None to run all, or a list of integers to run specific chunks.
+# Readiness chunks are 0-indexed relative to readiness (0, 1)
+# Mastery chunks are 0-indexed relative to mastery (0, ..., 9)
+RUN_READINESS_CHUNKS = []
+RUN_MASTERY_CHUNKS = [2,9]
 
 # Logic Constants
 NUM_READINESS_CHUNKS = 2

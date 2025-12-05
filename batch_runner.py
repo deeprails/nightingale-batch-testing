@@ -12,10 +12,25 @@ from src.config import (
     NUM_READINESS_CHUNKS, NUM_MASTERY_CHUNKS, TTL_SECONDS,
     PROMPT_VERSION, MODEL_NAME,
     DEFAULT_TEMP, REGRADE_TEMP,
-    mastery_item_to_prompt
+    mastery_item_to_prompt, readiness_item_to_prompt,
+    RUN_READINESS_CHUNKS, RUN_MASTERY_CHUNKS
 )
 from src.api import get_credentials, cache_video
 from src.workflow import grading, evaluation, judge, timestamping
+
+def get_active_mask(num_items, item_to_prompt_map, run_chunks_config):
+    """Generates a boolean mask for items based on selected chunks."""
+    if run_chunks_config is None:
+        return [True] * num_items
+    
+    mask = []
+    for i in range(num_items):
+        chunk_idx = item_to_prompt_map[i]
+        if chunk_idx in run_chunks_config:
+            mask.append(True)
+        else:
+            mask.append(False)
+    return mask
 
 def process_video(video_uri, output_dir):
     """
@@ -77,9 +92,11 @@ def process_video(video_uri, output_dir):
         
         # Grading Round 1
         r_grading_prompts = [PROMPT_1, PROMPT_2]
+        r_active_mask = get_active_mask(NUM_READINESS_ITEMS, readiness_item_to_prompt, RUN_READINESS_CHUNKS)
+        
         cache_name, r_grad_str_1, r_grades_1, r_tok_1 = grading(
             r_grading_prompts, readiness_rubric, readiness_info, None, True, 
-            [True] * NUM_READINESS_ITEMS, cache_name, video_uri, credentials, 
+            r_active_mask, cache_name, video_uri, credentials, 
             temperature=DEFAULT_TEMP, video_events=events_string
         )
         readiness_data["grading_strings_r1"] = r_grad_str_1
@@ -89,7 +106,7 @@ def process_video(video_uri, output_dir):
             all_readiness_grades[i][0] = g
 
         # Evaluation Round 1
-        proceeds = [True for _ in range(NUM_READINESS_ITEMS)] # strict architecture
+        proceeds = list(r_active_mask) # strict architecture
         r_eval_prompts = [EVALUATOR for _ in range(NUM_READINESS_CHUNKS)]
         cache_name, r_eval_str_1, r_agreements_1, r_eval_tok_1 = evaluation(
             r_eval_prompts, readiness_rubric, readiness_info, r_grad_str_1, True, 
@@ -147,12 +164,19 @@ def process_video(video_uri, output_dir):
 
         # Check Readiness Pass/Fail
         readiness_passes = 0
-        for i in range(NUM_READINESS_ITEMS):
-            final = all_readiness_grades[i][2] or all_readiness_grades[i][1] or all_readiness_grades[i][0]
-            if final == "Pass":
-                readiness_passes += 1
+        active_readiness_count = 0
         
-        if readiness_passes / NUM_READINESS_ITEMS < 0.8:
+        for i in range(NUM_READINESS_ITEMS):
+            # Only check items that were actually run
+            if r_active_mask[i]:
+                active_readiness_count += 1
+                final = all_readiness_grades[i][2] or all_readiness_grades[i][1] or all_readiness_grades[i][0]
+                if final == "Pass":
+                    readiness_passes += 1
+        
+        # If no readiness items were run, we shouldn't fail readiness.
+        # Otherwise, check against the 80% threshold of RUN items.
+        if active_readiness_count > 0 and (readiness_passes / active_readiness_count) < 0.8:
             print(f"Readiness failed for {video_uri}. Skipping Mastery.")
             result = {
                 "video_uri": video_uri,
@@ -177,9 +201,11 @@ def process_video(video_uri, output_dir):
             for j in range(mastery_item_to_prompt[i] + 1, NUM_MASTERY_CHUNKS):
                 previous_steps[j] += RUBRIC_ITEMS[NUM_READINESS_ITEMS + i] + "\n"
         
+        m_active_mask = get_active_mask(NUM_MASTERY_ITEMS, mastery_item_to_prompt, RUN_MASTERY_CHUNKS)
+
         cache_name, m_grad_str_1, m_grades_1, m_tok_1 = grading(
             m_grading_prompts, mastery_rubric, mastery_info, previous_steps, False,
-            [True] * NUM_MASTERY_ITEMS, cache_name, video_uri, credentials, 
+            m_active_mask, cache_name, video_uri, credentials, 
             temperature=DEFAULT_TEMP, video_events=events_string
         )
         mastery_data["grading_strings_r1"] = m_grad_str_1
@@ -189,7 +215,7 @@ def process_video(video_uri, output_dir):
             all_mastery_grades[i][0] = g
         
         # Evaluation Round 1
-        m_proceeds = [True for _ in range(NUM_MASTERY_ITEMS)]
+        m_proceeds = list(m_active_mask)
         m_eval_prompts = [EVALUATOR for _ in range(NUM_MASTERY_CHUNKS)]
         cache_name, m_eval_str_1, m_agreements_1, m_eval_tok_1 = evaluation(
             m_eval_prompts, mastery_rubric, mastery_info, m_grad_str_1, False,
