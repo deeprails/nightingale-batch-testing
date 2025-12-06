@@ -6,6 +6,10 @@ import google.auth
 from google.auth.transport.requests import Request
 from src.config import PROJECT_ID, LOCATION, MODEL_NAME, FPS
 
+# Timeout settings (in seconds)
+CACHE_TIMEOUT = 120  # 2 minutes for caching
+GENERATE_TIMEOUT = 300  # 5 minutes for generation (videos can take a while)
+
 def get_credentials():
     """Gets default Google credentials."""
     credentials, project_id = google.auth.default()
@@ -75,16 +79,21 @@ def cache_video(video_uri, ttl, credentials):
             print("Retrying cache request...")
             time.sleep(2)
         
-        response = requests.post(url, headers=headers, json=request_body)
-        if response.status_code == 200:
-            return response
+        try:
+            response = requests.post(url, headers=headers, json=request_body, timeout=CACHE_TIMEOUT)
+            if response.status_code == 200:
+                return response
+                
+            print(f"Cache request failed: {response.status_code} {response.text}")
+            if response.status_code == 401:
+                headers = refresh_credentials(credentials)
+                print("Authentication credentials refreshed!")
+        except requests.exceptions.Timeout:
+            print(f"Cache request timed out (attempt {i+1}/3)")
+        except requests.exceptions.RequestException as e:
+            print(f"Cache request error: {e}")
             
-        print(f"Cache request failed: {response.status_code} {response.text}")
-        if response.status_code == 401:
-            headers = refresh_credentials(credentials)
-            print("Authentication credentials refreshed!")
-            
-    raise Exception(f"Failed to cache video after retries. Status: {response.status_code}")
+    raise Exception(f"Failed to cache video after retries")
 
 def poll_vertex(prompts, response_schema, cache_name, video_uri, credentials, temperature):
     """Polls Vertex AI with the given prompts."""
@@ -106,7 +115,7 @@ def poll_vertex(prompts, response_schema, cache_name, video_uri, credentials, te
                 print(f"Retrying request {index} (attempt {i+1})...")
             
             try:
-                response = requests.post(url, headers=headers, json=request_array[index])
+                response = requests.post(url, headers=headers, json=request_array[index], timeout=GENERATE_TIMEOUT)
                 
                 if response.status_code == 200:
                     responses.append(response)
@@ -138,9 +147,22 @@ def poll_vertex(prompts, response_schema, cache_name, video_uri, credentials, te
                     print(f"Resource exhausted. Sleeping for {sleep_time:.2f}s")
                     time.sleep(sleep_time)
                     continue
+                
+                # Server errors - retry with backoff
+                if response.status_code >= 500:
+                    sleep_time = min(30, 2 ** i)
+                    print(f"Server error. Sleeping for {sleep_time}s before retry...")
+                    time.sleep(sleep_time)
+                    continue
                     
+            except requests.exceptions.Timeout:
+                print(f"Request {index} timed out after {GENERATE_TIMEOUT}s (attempt {i+1}/{REQUEST_RETRIES})")
+                time.sleep(5)
+            except requests.exceptions.RequestException as e:
+                print(f"Request exception: {e}")
+                time.sleep(5)
             except Exception as e:
-                print(f"Exception during request: {e}")
+                print(f"Unexpected exception during request: {e}")
                 time.sleep(5)
         
         if not success:

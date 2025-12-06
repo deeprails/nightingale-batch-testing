@@ -109,23 +109,24 @@ def convert_judge_score(score):
 def flatten_data(data):
     """
     Combine readiness and mastery data into single lists, **aligned by rubric item**.
-
-    We do not assume that the per-phase reporting lists (e.g. grading_strings_r2)
-    are full length; instead we align them against the grade arrays, filling in
-    sensible defaults when a particular item/round was never run.
+    Now uses indices from the JSON to track original rubric item numbers.
     """
-    if not data.get("readiness_data") or not data.get("mastery_data"):
-        return None  # Incomplete data
-
-    rd = data["readiness_data"] or {}
-    md = data["mastery_data"] or {}
+    rd = data.get("readiness_data") or {}
+    md = data.get("mastery_data") or {}
 
     readiness_grades = data.get("readiness_grades", [])
     mastery_grades = data.get("mastery_grades", [])
+    
+    # Get original rubric item indices (1-based)
+    readiness_indices = data.get("readiness_indices", list(range(1, len(readiness_grades) + 1)))
+    mastery_indices = data.get("mastery_indices", list(range(NUM_READINESS_ITEMS + 1, NUM_READINESS_ITEMS + len(mastery_grades) + 1)))
 
     num_readiness = len(readiness_grades)
     num_mastery = len(mastery_grades)
     total_items = num_readiness + num_mastery
+
+    if total_items == 0:
+        return None
 
     keys = [
         "grading_strings_r1", "grading_tokens_r1",
@@ -148,20 +149,19 @@ def flatten_data(data):
 
     flat = {k: [] for k in keys}
     flat["grades"] = []
+    flat["rubric_indices"] = []  # Track original rubric item numbers
 
-    for global_idx in range(total_items):
-        if global_idx < num_readiness:
-            src = rd
-            local_idx = global_idx
-            grade = readiness_grades[local_idx]
-        else:
-            src = md
-            local_idx = global_idx - num_readiness
-            grade = mastery_grades[local_idx]
-
-        flat["grades"].append(grade)
+    for local_idx in range(num_readiness):
+        flat["grades"].append(readiness_grades[local_idx])
+        flat["rubric_indices"].append(readiness_indices[local_idx])
         for k in keys:
-            flat[k].append(get_item(src, k, local_idx))
+            flat[k].append(get_item(rd, k, local_idx))
+
+    for local_idx in range(num_mastery):
+        flat["grades"].append(mastery_grades[local_idx])
+        flat["rubric_indices"].append(mastery_indices[local_idx])
+        for k in keys:
+            flat[k].append(get_item(md, k, local_idx))
 
     return flat
 
@@ -197,8 +197,8 @@ def upload_results(json_dir, spreadsheet_id, sheet_name):
 
         print(f"Processing {data['video_uri']}...")
 
-        num_readiness = len(data["readiness_grades"])
-        num_mastery = len(data["mastery_grades"])
+        num_readiness = len(data.get("readiness_grades", []))
+        num_mastery = len(data.get("mastery_grades", []))
         total_items = num_readiness + num_mastery
 
         # Track readiness and mastery chunks separately for merging
@@ -226,6 +226,7 @@ def upload_results(json_dir, spreadsheet_id, sheet_name):
             j_rationale = flat["judge_rationales"][i]
             j_tokens = flat["judge_tokens"][i]
             grades = flat["grades"][i]  # [g1, g2, judge]
+            rubric_item_number = flat["rubric_indices"][i]  # Original 1-based rubric item number
 
             # Round 1 Grader
             r1_score_raw, r1_rationale, r1_confidence = extract_score_and_rationale(
@@ -277,7 +278,7 @@ def upload_results(json_dir, spreadsheet_id, sheet_name):
             prompt_id = data['prompt_id']
 
             row = [
-                i + 1,
+                rubric_item_number,  # Use actual rubric item number instead of i+1
                 timestamp,
                 prompt_id,
                 VIDEO_TYPE_NAME,

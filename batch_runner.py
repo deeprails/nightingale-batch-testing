@@ -32,6 +32,14 @@ def get_active_mask(num_items, item_to_prompt_map, run_chunks_config):
             mask.append(False)
     return mask
 
+def filter_by_mask(data_list, mask):
+    """Filter a list to only include items where mask is True."""
+    return [item for item, active in zip(data_list, mask) if active]
+
+def get_active_indices(mask, offset=0):
+    """Get the original indices (1-based) for active items."""
+    return [i + 1 + offset for i, active in enumerate(mask) if active]
+
 def process_video(video_uri, output_dir):
     """
     Full pipeline processing for a single video.
@@ -176,13 +184,19 @@ def process_video(video_uri, output_dir):
         # Otherwise, check against the 80% threshold of RUN items.
         if active_readiness_count > 0 and (readiness_passes / active_readiness_count) < 0.8:
             print(f"Readiness failed for {video_uri}. Skipping Mastery.")
+            
+            # Filter readiness data to only include active items
+            filtered_readiness_data = _filter_phase_data(readiness_data, r_active_mask)
+            
             result = {
                 "video_uri": video_uri,
                 "status": "Failed Readiness",
-                "readiness_grades": all_readiness_grades,
+                "readiness_indices": get_active_indices(r_active_mask, offset=0),
+                "mastery_indices": [],
+                "readiness_grades": filter_by_mask(all_readiness_grades, r_active_mask),
                 "mastery_grades": [],
-                "readiness_data": readiness_data,
-                "mastery_data": mastery_data
+                "readiness_data": filtered_readiness_data,
+                "mastery_data": {}
             }
             _save_result(result, output_dir)
             return result
@@ -267,13 +281,19 @@ def process_video(video_uri, output_dir):
                     mastery_data["judge_rationales"][i] = j_rat
                     mastery_data["judge_tokens"][i] = j_tok
 
+        # Filter data to only include active items
+        filtered_readiness_data = _filter_phase_data(readiness_data, r_active_mask)
+        filtered_mastery_data = _filter_phase_data(mastery_data, m_active_mask)
+
         result = {
             "video_uri": video_uri,
             "status": "Complete",
-            "readiness_grades": all_readiness_grades,
-            "mastery_grades": all_mastery_grades,
-            "readiness_data": readiness_data,
-            "mastery_data": mastery_data
+            "readiness_indices": get_active_indices(r_active_mask, offset=0),
+            "mastery_indices": get_active_indices(m_active_mask, offset=NUM_READINESS_ITEMS),
+            "readiness_grades": filter_by_mask(all_readiness_grades, r_active_mask),
+            "mastery_grades": filter_by_mask(all_mastery_grades, m_active_mask),
+            "readiness_data": filtered_readiness_data,
+            "mastery_data": filtered_mastery_data
         }
         _save_result(result, output_dir)
         return result
@@ -283,6 +303,16 @@ def process_video(video_uri, output_dir):
         result = {"video_uri": video_uri, "status": "Error", "error": str(e)}
         _save_result(result, output_dir)
         return result
+
+def _filter_phase_data(phase_data, mask):
+    """Filter phase data (readiness_data or mastery_data) to only include active items."""
+    filtered = {}
+    for key, values in phase_data.items():
+        if isinstance(values, list) and len(values) == len(mask):
+            filtered[key] = filter_by_mask(values, mask)
+        else:
+            filtered[key] = values
+    return filtered
 
 def _save_result(result, output_dir):
     """Helper to save individual result to JSON safely."""
