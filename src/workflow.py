@@ -133,9 +133,10 @@ def grading(prompts, rubric_items, additional_info, previous_steps, is_readiness
                     "type": "object",
                     "properties": {
                         "score": {"type": "string", "enum": ["Not Demonstrated", "Fail", "Pass"]},
+                        "confidence": {"type": "string", "enum": ["UNCERTAIN", "LOW", "MEDIUM", "HIGH", "CERTAIN"]},
                         "rationale": {"type": "string"}
                     },
-                    "required": ["score", "rationale"]
+                    "required": ["score", "confidence", "rationale"]
                 }
             }
         },
@@ -185,7 +186,7 @@ def grading(prompts, rubric_items, additional_info, previous_steps, is_readiness
         if not is_readiness:
             effective_index += NUM_READINESS_ITEMS
             
-        result_string = f"Rubric item {effective_index}:\nScore: {item['score']}\nRationale: {item['rationale']}"
+        result_string = f"Rubric item {effective_index}:\nScore: {item['score']}\nConfidence: {item.get('confidence', 'N/A')}\nRationale: {item['rationale']}"
         grading_result_strings.append(result_string)
         scores.append(item["score"])
         
@@ -219,9 +220,10 @@ def evaluation(prompts, rubric_items, additional_info, grading_strings, is_readi
                     "properties": {
                         "score_verdict": {"type": "boolean"},
                         "rationale_verdict": {"type": "boolean"},
+                        "confidence": {"type": "string", "enum": ["UNCERTAIN", "LOW", "MEDIUM", "HIGH", "CERTAIN"]},
                         "reasoning": {"type": "string"}
                     },
-                    "required": ["score_verdict", "rationale_verdict", "reasoning"]
+                    "required": ["score_verdict", "rationale_verdict", "confidence", "reasoning"]
                 }
             }
         },
@@ -246,7 +248,7 @@ def evaluation(prompts, rubric_items, additional_info, grading_strings, is_readi
             verdict["_tokens"] = (total, cached)
             eval_verdicts.append(verdict)
 
-    agreements = [True] * len(rubric_items)
+    regrade_needed = [False] * len(rubric_items)
     eval_strings = []
     token_data = []
     
@@ -268,17 +270,36 @@ def evaluation(prompts, rubric_items, additional_info, grading_strings, is_readi
         if not is_readiness:
             effective_index += NUM_READINESS_ITEMS
             
-        eval_string = f"Rubric item {effective_index}\nScore Agreed?: {item['score_verdict']}\nRationale Agreed?: {item['rationale_verdict']}\nReasoning: {item['reasoning']}"
+        eval_string = f"Rubric item {effective_index}\nScore Agreed?: {item['score_verdict']}\nRationale Agreed?: {item['rationale_verdict']}\nConfidence: {item.get('confidence', 'N/A')}\nReasoning: {item['reasoning']}"
         eval_strings.append(eval_string)
         
-        is_agreed = item["score_verdict"] and item["rationale_verdict"]
-        agreements[item_index] = is_agreed
+        # Logic for regrade based on confidence and agreement
+        score_agreed = item["score_verdict"]
+        confidence = item.get("confidence", "MEDIUM") # Default to MEDIUM if missing
+        
+        should_regrade = False
+        if not score_agreed:
+            # Evaluator disagrees
+            if confidence in ["MEDIUM", "HIGH", "CERTAIN"]:
+                should_regrade = True
+            else:
+                # Disagrees but uncertain -> trust original grader
+                should_regrade = False
+        else:
+            # Evaluator agrees
+            if confidence in ["UNCERTAIN", "LOW"]:
+                # Agrees but uncertain -> double check
+                should_regrade = True
+            else:
+                should_regrade = False
+                
+        regrade_needed[item_index] = should_regrade
         token_data.append(item.get("_tokens", (0, 0)))
         
         verdict_idx += 1
         item_index += 1
 
-    return cache_name, eval_strings, agreements, token_data
+    return cache_name, eval_strings, regrade_needed, token_data
 
 def assemble_judge(item, g1, e1, g2, e2, info, video_events=None):
     filled = re.sub("{{{RUBRIC_ITEM}}}", re.escape(item), JUDGE_PROMPT)

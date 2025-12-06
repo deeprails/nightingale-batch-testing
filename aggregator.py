@@ -24,25 +24,29 @@ def find_first_empty_row(worksheet, check_col='C'):
 def extract_score_and_rationale(grading_string):
     """Extract score and rationale from a grading result string."""
     if not grading_string:
-        return None, None
+        return None, None, None
     score = None
     rationale = None
+    confidence = None
     lines = grading_string.split('\n')
     for line in lines:
         if line.startswith('Score:'):
             score = line.replace('Score:', '').strip()
         elif line.startswith('Rationale:'):
             rationale = line.replace('Rationale:', '').strip()
-    return score, rationale
+        elif line.startswith('Confidence:'):
+            confidence = line.replace('Confidence:', '').strip()
+    return score, rationale, confidence
 
 
 def extract_eval_verdicts(eval_string):
     """Extract score_verdict, rationale_verdict, and reasoning from eval string."""
     if not eval_string:
-        return None, None, None
+        return None, None, None, None
     score_verdict = None
     rationale_verdict = None
     reasoning = None
+    confidence = None
     lines = eval_string.split('\n')
     for line in lines:
         if line.startswith('Score Agreed?:'):
@@ -51,7 +55,9 @@ def extract_eval_verdicts(eval_string):
             rationale_verdict = line.replace('Rationale Agreed?:', '').strip()
         elif line.startswith('Reasoning:'):
             reasoning = line.replace('Reasoning:', '').strip()
-    return score_verdict, rationale_verdict, reasoning
+        elif line.startswith('Confidence:'):
+            confidence = line.replace('Confidence:', '').strip()
+    return score_verdict, rationale_verdict, reasoning, confidence
 
 
 def convert_grader_score(score, is_round_1=True):
@@ -222,13 +228,13 @@ def upload_results(json_dir, spreadsheet_id, sheet_name):
             grades = flat["grades"][i]  # [g1, g2, judge]
 
             # Round 1 Grader
-            r1_score_raw, r1_rationale = extract_score_and_rationale(
+            r1_score_raw, r1_rationale, r1_confidence = extract_score_and_rationale(
                 g_string_r1)
             r1_score = convert_grader_score(r1_score_raw, True)
 
             # Round 1 Evaluator
             r1_was_evaluated = bool(e_string_r1)
-            r1_eval_score_raw, r1_eval_rat_raw, r1_eval_reason = extract_eval_verdicts(
+            r1_eval_score_raw, r1_eval_rat_raw, r1_eval_reason, r1_eval_confidence = extract_eval_verdicts(
                 e_string_r1)
             r1_eval_score = convert_eval_score_verdict(
                 r1_eval_score_raw, r1_was_evaluated)
@@ -236,13 +242,13 @@ def upload_results(json_dir, spreadsheet_id, sheet_name):
                 r1_eval_rat_raw, r1_was_evaluated)
 
             # Round 2 Grader
-            r2_score_raw, r2_rationale = extract_score_and_rationale(
+            r2_score_raw, r2_rationale, r2_confidence = extract_score_and_rationale(
                 g_string_r2)
             r2_score = convert_grader_score(r2_score_raw, False)
 
             # Round 2 Evaluator
             r2_was_evaluated = bool(e_string_r2)
-            r2_eval_score_raw, r2_eval_rat_raw, r2_eval_reason = extract_eval_verdicts(
+            r2_eval_score_raw, r2_eval_rat_raw, r2_eval_reason, r2_eval_confidence = extract_eval_verdicts(
                 e_string_r2)
             r2_eval_score = convert_eval_score_verdict(
                 r2_eval_score_raw, r2_was_evaluated)
@@ -285,11 +291,13 @@ def upload_results(json_dir, spreadsheet_id, sheet_name):
                 "",  # FINAL SCORE - AI-ENG. SCORE
                 r1_score,
                 r1_rationale or "",
+                r1_confidence or "", # New column
                 get_tok(g_tokens_r1, 0),
                 get_tok(g_tokens_r1, 1),
                 r1_eval_score,
                 r1_eval_rat,
                 r1_eval_reason or "",
+                r1_eval_confidence or "", # New column
                 get_tok(e_tokens_r1, 0),
                 get_tok(e_tokens_r1, 1),
                 "",  # R1 CHECK
@@ -297,11 +305,13 @@ def upload_results(json_dir, spreadsheet_id, sheet_name):
                 "",  # R1 COMMENTS
                 r2_score,
                 r2_rationale or "",
+                r2_confidence or "", # New column
                 get_tok(g_tokens_r2, 0),
                 get_tok(g_tokens_r2, 1),
                 r2_eval_score,
                 r2_eval_rat,
                 r2_eval_reason or "",
+                r2_eval_confidence or "", # New column
                 get_tok(e_tokens_r2, 0),
                 get_tok(e_tokens_r2, 1),
                 "",  # R2 CHECK
@@ -321,12 +331,8 @@ def upload_results(json_dir, spreadsheet_id, sheet_name):
 
     if rows_to_upload:
         print(f"Uploading {len(rows_to_upload)} rows...")
-        # Batch update to optimize
-        # Using batch_update logic from notebook (cell updates) is safer for preserving existing data in other columns
-        # But if we are appending to new rows, we can just use append_rows or update range.
-        # Notebook used batch_update with specific ranges.
-
-        merge_columns = [5, 14, 15, 19, 20, 26, 27, 31, 32, 38, 39]
+        
+        merge_columns = [5, 15, 16, 21, 22, 29, 30, 35, 36, 42, 43]
 
         cell_updates = []
         for row_idx, row in enumerate(rows_to_upload):

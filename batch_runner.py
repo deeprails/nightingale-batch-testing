@@ -108,7 +108,7 @@ def process_video(video_uri, output_dir):
         # Evaluation Round 1
         proceeds = list(r_active_mask) # strict architecture
         r_eval_prompts = [EVALUATOR for _ in range(NUM_READINESS_CHUNKS)]
-        cache_name, r_eval_str_1, r_agreements_1, r_eval_tok_1 = evaluation(
+        cache_name, r_eval_str_1, r_regrade_needed_1, r_eval_tok_1 = evaluation(
             r_eval_prompts, readiness_rubric, readiness_info, r_grad_str_1, True, 
             proceeds, cache_name, video_uri, credentials, video_events=events_string
         )
@@ -116,13 +116,12 @@ def process_video(video_uri, output_dir):
         readiness_data["eval_tokens_r1"] = r_eval_tok_1
         
         # Regrading & Judging if needed
-        r_redos = [not a for a in r_agreements_1]
-        if any(r_redos):
-            print(f"Regrading needed for Readiness items: {[i+1 for i, x in enumerate(r_redos) if x]}")
+        if any(r_regrade_needed_1):
+            print(f"Regrading needed for Readiness items: {[i+1 for i, x in enumerate(r_regrade_needed_1) if x]}")
             r_regrade_prompts = [REGRADER for _ in range(NUM_READINESS_CHUNKS)]
             cache_name, r_grad_str_2, r_grades_2, r_tok_2 = grading(
                 r_regrade_prompts, readiness_rubric, readiness_info, None, True, 
-                r_redos, cache_name, video_uri, credentials, 
+                r_regrade_needed_1, cache_name, video_uri, credentials, 
                 temperature=REGRADE_TEMP, video_events=events_string
             )
             readiness_data["grading_strings_r2"] = r_grad_str_2
@@ -131,24 +130,23 @@ def process_video(video_uri, output_dir):
             # Update state
             r_proceeds_2 = []
             for i, g in enumerate(r_grades_2):
-                if r_redos[i]:
+                if r_regrade_needed_1[i]:
                     all_readiness_grades[i][1] = g
                     r_proceeds_2.append(True)
                 else:
                     r_proceeds_2.append(False)
 
             # Evaluation Round 2
-            cache_name, r_eval_str_2, r_agreements_2, r_eval_tok_2 = evaluation(
+            cache_name, r_eval_str_2, r_regrade_needed_2, r_eval_tok_2 = evaluation(
                 r_eval_prompts, readiness_rubric, readiness_info, r_grad_str_2, True,
                 r_proceeds_2, cache_name, video_uri, credentials, video_events=events_string
             )
             readiness_data["eval_strings_r2"] = r_eval_str_2
             readiness_data["eval_tokens_r2"] = r_eval_tok_2
+
             
-            # Judge
-            judge_needed = [not a for a in r_agreements_2]
-            for i, needed in enumerate(judge_needed):
-                if needed and r_redos[i]: # Only if it was regraded
+            for i, needed in enumerate(r_regrade_needed_2):
+                if needed and r_regrade_needed_1[i]: # Only if it was regraded AND still needs attention
                     print(f"Judging Readiness Item {i+1}...")
                     cache_name, j_str, j_score, j_rat, j_tok = judge(
                         cache_name, readiness_rubric[i],
@@ -217,7 +215,7 @@ def process_video(video_uri, output_dir):
         # Evaluation Round 1
         m_proceeds = list(m_active_mask)
         m_eval_prompts = [EVALUATOR for _ in range(NUM_MASTERY_CHUNKS)]
-        cache_name, m_eval_str_1, m_agreements_1, m_eval_tok_1 = evaluation(
+        cache_name, m_eval_str_1, m_regrade_needed_1, m_eval_tok_1 = evaluation(
             m_eval_prompts, mastery_rubric, mastery_info, m_grad_str_1, False,
             m_proceeds, cache_name, video_uri, credentials, video_events=events_string
         )
@@ -225,13 +223,12 @@ def process_video(video_uri, output_dir):
         mastery_data["eval_tokens_r1"] = m_eval_tok_1
         
         # Regrading
-        m_redos = [not a for a in m_agreements_1]
-        if any(m_redos):
-            print(f"Regrading needed for Mastery items: {[i+1 for i, x in enumerate(m_redos) if x]}")
+        if any(m_regrade_needed_1):
+            print(f"Regrading needed for Mastery items: {[i+1 for i, x in enumerate(m_regrade_needed_1) if x]}")
             m_regrade_prompts = [REGRADER for _ in range(NUM_MASTERY_CHUNKS)]
             cache_name, m_grad_str_2, m_grades_2, m_tok_2 = grading(
                 m_regrade_prompts, mastery_rubric, mastery_info, previous_steps, False,
-                m_redos, cache_name, video_uri, credentials, 
+                m_regrade_needed_1, cache_name, video_uri, credentials, 
                 temperature=REGRADE_TEMP, video_events=events_string
             )
             mastery_data["grading_strings_r2"] = m_grad_str_2
@@ -239,14 +236,14 @@ def process_video(video_uri, output_dir):
             
             m_proceeds_2 = []
             for i, g in enumerate(m_grades_2):
-                if m_redos[i]:
+                if m_regrade_needed_1[i]:
                     all_mastery_grades[i][1] = g
                     m_proceeds_2.append(True)
                 else:
                     m_proceeds_2.append(False)
                     
             # Evaluation Round 2
-            cache_name, m_eval_str_2, m_agreements_2, m_eval_tok_2 = evaluation(
+            cache_name, m_eval_str_2, m_regrade_needed_2, m_eval_tok_2 = evaluation(
                 m_eval_prompts, mastery_rubric, mastery_info, m_grad_str_2, False,
                 m_proceeds_2, cache_name, video_uri, credentials, video_events=events_string
             )
@@ -254,9 +251,8 @@ def process_video(video_uri, output_dir):
             mastery_data["eval_tokens_r2"] = m_eval_tok_2
             
             # Judge
-            judge_needed = [not a for a in m_agreements_2]
-            for i, needed in enumerate(judge_needed):
-                if needed and m_redos[i]:
+            for i, needed in enumerate(m_regrade_needed_2):
+                if needed and m_regrade_needed_1[i]:
                     print(f"Judging Mastery Item {i+1}...")
                     
                     cache_name, j_str, j_score, j_rat, j_tok = judge(

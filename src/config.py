@@ -4,7 +4,7 @@ LOCATION = "global"
 MODEL_NAME = "gemini-2.5-pro"
 BUCKET_NAME = "nightingale-deeprails-vertex-videos"
 VIDEO_TYPE_NAME = "BSN206 Handwashing"
-PROMPT_VERSION = "new_dec5_1"
+PROMPT_VERSION = "new_dec5_3"
 
 # Video Settings
 FPS = 10.0
@@ -16,14 +16,14 @@ REGRADE_TEMP = 0.7
 # Set to None to run all, or a list of integers to run specific chunks.
 # Readiness chunks are 0-indexed relative to readiness (0, 1)
 # Mastery chunks are 0-indexed relative to mastery (0, ..., 9)
-RUN_READINESS_CHUNKS = []
-RUN_MASTERY_CHUNKS = [2,9]
+RUN_READINESS_CHUNKS = [1]
+RUN_MASTERY_CHUNKS = [0,2,8,9]
 
 # Logic Constants
 NUM_READINESS_CHUNKS = 2
 NUM_MASTERY_CHUNKS = 10
 NUM_READINESS_ITEMS = 12
-NUM_MASTERY_ITEMS = 41
+NUM_MASTERY_ITEMS = 40
 
 # Rubric Items
 RUBRIC_ITEMS = [
@@ -76,7 +76,7 @@ RUBRIC_ITEMS = [
     # Item 24
     "Uses clean paper towel to dry hands",
     # Item 25
-    "Dries hands starting from fingertips and moving to wrists, without skipping any areas or moving from wrists back to the fingertips",
+    "Dries hands completely, without skipping any areas",
     # Item 26
     "Disposes of paper towel without contaminating hands by touching other surfaces",
     # Item 27
@@ -122,16 +122,14 @@ RUBRIC_ITEMS = [
     # Item 47
     "Pulls hand out while maintaining hold on the glove",
     # Item 48
-    "As the hand pulls out of the glove, the interior of the glove rolls to fold over the soiled outside of the glove",
-    # Item 49
     "Uses still gloved hand to hold the used glove before taking the other off OR disposes of the first glove into the trash receptacle or designated waste area immediately.",
-    # Item 50
+    # Item 49
     "Insert a few bare fingers into the glove where wrist meets palm",
-    # Item 51
+    # Item 50
     "Pushing with the inserted fingers, take glove off by folding the inside of the glove over the outside",
-    # Item 52
+    # Item 51
     "If the first glove has not been disposed of, the second glove also rolls over it as part of removal such that the second glove entirely wraps around the first glove",
-    # Item 53
+    # Item 52
     "Discard used gloves in the trash receptacle or designated waste area without touching any other surface"
 ]
 
@@ -140,7 +138,7 @@ readiness_item_to_prompt = [0,0,0,0,0,0,1,1,1,1,1,1]
 mastery_item_to_prompt = [0,0,0,0,0,1,1,1,1,1,2,2,
                           2,2,2,2,3,3,3,4,4,5,5,5,
                           5,6,6,6,6,6,7,7,7,8,8,8,
-                          8,9,9,9,9]
+                          9,9,9,9]
 
 # Rubric Info (Rules & Examples)
 RUBRIC_INFO = [
@@ -247,33 +245,40 @@ RUBRIC_INFO = [
     # Item 51
     "",
     # Item 52
-    "",
-    # Item 53
     ""
 ]
 
 # Prompts
 TIMESTAMP_PROMPT = """
-You are an expert nursing education evaluator. Your job is to review a video of a nursing student demonstrating handwashing & sterile gloving, and create a timeline of key events.
 
+You are an expert video assignment evaluator. Your job is to review a video of a student demonstrating different actions and skills, and create a timeline of key events.
 ### Instructions
+
 1. Watch the video carefully from start to finish.
-2. Identify the timestamps for key events in the process, such as drying hands, opening glove package, etc.
-3. Do not evaluate the quality of the performance. Focus only on WHAT happened and WHEN.
-4. Output a JSON object with a list of events, each having a timestamp (e.g., "00:15") and a brief description.
+2. Identify the timestamps for key events in the process, such as grabbing door knob, opening door, etc.
+3. Output a JSON object with a list of events, each having a timestamp (e.g., "00:15") and a brief description.
+
+Rules:
+- You must analyze the video carefully frame by frame. Do not assume the subject is doing actions correctly. Pay no heed to what the subject says as their words may not match with what's shown on the video.
+- If the subject is only mimicking doing an action, you must specify it; e.g. "PRETENDS to open door".
+- Subjects tend to pretend actions that they aren't actually doing. You MUST identify when this is the case, as this is done with fraudulent intent.
+- Subjects tend to mention they're doing something or showing something but in reality they don't do it on screen. You MUST identify when this is the case as we must differentiate from ENTIONED actions, PRETENDED actions and PERFORMED actions.
+- You MUST be concise in your event descriptions.
+- You MUST follow the example output formatting.
 
 Example Output:
 {
-  "events": [
-    {"timestamp": "00:05", "event": "Turns on sink water"},
-    {"timestamp": "00:10", "event": "Wets hands"},
-    ...
-  ]
+"events": [
+{"timestamp": "00:02", "event": "MENTIONS: Has a key"},
+{"timestamp": "00:05", "event": "PERFORMS: Grabs door knob"},
+{"timestamp": "00:10", "event": "PRETENDS: Opens door"},
+...
+]
 }
 """
 
 PROMPT_1 = """
-You are an expert nursing education evaluator. Your job is to review a video of a nursing student demonstrating handwashing & sterile gloving, and then evaluate several specific details of their preparation for the task.
+You are an expert nursing education evaluator. Your job is to review a video of a nursing student attempting to correctly perform handwashing and sterile gloving, and then evaluate several specific details of their preparation for the task.
 
 ### Readiness Criteria
 You will be evaluating whether or not the student did six things properly:
@@ -284,18 +289,19 @@ You will be evaluating whether or not the student did six things properly:
 
 ### Steps
 1. Read the Rules section below, being sure to understand them completely and keep them in mind during your evaluation.
-2. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
-3. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning.
+2. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously. Use the Video Events to help focus on the relevant parts of the video.
+3. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning. It's okay if you're not entirely confident in your assessment
 4. Attach a clear and brief piece of feedback with a neutral tone to each score that summarizes your chain-of-thought reasoning. Cite specific visual and/or audio evidence to support your reasoning.
 5. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
+   - `confidence`: Your confidence level in this score. One of: **UNCERTAIN**, **LOW**, **MEDIUM**, **HIGH**, **CERTAIN**.
    - `rationale`: A concise but complete explanation of your judgment. Write clearly with a neutral tone as if giving feedback to the student, covering all relevant details.
 
 {{{INFO}}}
 """
 
 PROMPT_2 = """
-You are an expert nursing education evaluator. Your job is to review a video of a nursing student demonstrating handwashing & sterile gloving, and then evaluate several specific details of their preparation for the task.
+You are an expert nursing education evaluator. Your job is to review a video of a nursing student attempting to correctly perform handwashing & sterile gloving, and then evaluate several specific details of their preparation for the task.
 
 ### Readiness Criteria
 You will be evaluating whether or not the student prepared six things properly:
@@ -306,18 +312,19 @@ You will be evaluating whether or not the student prepared six things properly:
 
 ### Steps
 1. Read the Rules section below, being sure to understand them completely and keep them in mind during your evaluation.
-2. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
-3. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning.
+2. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously. Use the Video Events to help focus on the relevant parts of the video.
+3. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning. It's okay if you're not entirely confident in your assessment.
 4. Attach a clear and brief piece of feedback with a neutral tone to each score that summarizes your chain-of-thought reasoning. Cite specific visual and/or audio evidence to support your reasoning.
 5. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
+   - `confidence`: Your confidence level in this score. One of: **UNCERTAIN**, **LOW**, **MEDIUM**, **HIGH**, **CERTAIN**.
    - `rationale`: A concise but complete explanation of your judgment. Write clearly with a neutral tone as if giving feedback to the student, covering all relevant details.
 
 {{{INFO}}}
 """
 
 PROMPT_3 = """
-You are an expert nursing education evaluator. Your job is to review a video of a nursing student demonstrating handwashing & sterile gloving, and then evaluate several specific details of the handwashing task.
+You are an expert nursing education evaluator. Your job is to review a video of a nursing student attempting to correctly perform handwashing & sterile gloving, and then evaluate several specific details of the handwashing task. 
 
 ### Skill Mastery Criteria
 You will be evaluating whether or not the student completed five components of handwashing properly:
@@ -328,8 +335,8 @@ You will be evaluating whether or not the student completed five components of h
 
 ### Steps
 1. Read the Rules section below, being sure to understand them completely and keep them in mind during your evaluation.
-2. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
-3. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning.
+2. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously. Use the Video Events to help focus on the relevant parts of the video.
+3. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning. It's okay if you're not entirely confident in your assessment.
 4. Attach a clear and brief piece of feedback with a neutral tone to each score that summarizes your chain-of-thought reasoning. Cite specific visual and/or audio evidence to support your reasoning.
 5. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
@@ -339,7 +346,7 @@ You will be evaluating whether or not the student completed five components of h
  """
 
 PROMPT_4 = """
-You are an expert nursing education evaluator. Your job is to review a video of a nursing student demonstrating handwashing & sterile gloving, and then evaluate several specific details of the handwashing task. The previous steps in handwashing are provided for context.
+You are an expert nursing education evaluator. Your job is to review a video of a nursing student attempting to correctly perform handwashing & sterile gloving, and then evaluate several specific details of the handwashing task. The previous steps in handwashing are provided for context.
 
 ### Skill Mastery Criteria
 You will be evaluating whether or not the student completed five components of handwashing properly:
@@ -354,18 +361,19 @@ You will be evaluating whether or not the student completed five components of h
 ### Steps
 1. Read the Rules section below, being sure to understand them completely and keep them in mind during your evaluation.
 2. Read the Previous Steps in handwashing, and use that context to inform your evaluations of the current Skill Mastery Criteria.
-3. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
-4. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning.
+3. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously. Use the Video Events to help focus on the relevant parts of the video.
+4. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning. It's okay if you're not entirely confident in your assessment.
 5. Attach a clear and brief piece of feedback with a neutral tone to each score that summarizes your chain-of-thought reasoning. Cite specific visual and/or audio evidence to support your reasoning.
 6. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
+   - `confidence`: Your confidence level in this score. One of: **UNCERTAIN**, **LOW**, **MEDIUM**, **HIGH**, **CERTAIN**.
    - `rationale`: A concise but complete explanation of your judgment. Write clearly with a neutral tone as if giving feedback to the student, covering all relevant details.
 
 {{{INFO}}}
 """
 
 PROMPT_5 = """
-You are an expert nursing education evaluator. Your job is to review a video of a nursing student demonstrating handwashing & sterile gloving, and then evaluate several specific details of the handwashing task. The previous steps in handwashing are provided for context.
+You are an expert nursing education evaluator. Your job is to review a video of a nursing student attempting to correctly perform handwashing & sterile gloving, and then evaluate several specific details of the handwashing task. The previous steps in handwashing are provided for context.
 
 ### Skill Mastery Criteria
 You will be evaluating whether or not the student completed six components of handwashing properly:
@@ -380,18 +388,19 @@ You will be evaluating whether or not the student completed six components of ha
 ### Steps
 1. Read the Rules section below, being sure to understand them completely and keep them in mind during your evaluation.
 2. Read the Previous Steps in handwashing, and use that context to inform your evaluations of the current Skill Mastery Criteria.
-3. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
-4. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning.
+3. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously. Use the Video Events to help focus on the relevant parts of the video.
+4. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning. It's okay if you're not entirely confident in your assessment.
 5. Attach a clear and brief piece of feedback with a neutral tone to each score that summarizes your chain-of-thought reasoning. Cite specific visual and/or audio evidence to support your reasoning.
 6. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
+   - `confidence`: Your confidence level in this score. One of: **UNCERTAIN**, **LOW**, **MEDIUM**, **HIGH**, **CERTAIN**.
    - `rationale`: A concise but complete explanation of your judgment. Write clearly with a neutral tone as if giving feedback to the student, covering all relevant details.
 
 {{{INFO}}}
 """
 
 PROMPT_6 = """
-You are an expert nursing education evaluator. Your job is to review a video of a nursing student demonstrating handwashing & sterile gloving, and then evaluate several specific details of the sterile gloving task. The previous steps of handwashing are provided for context.
+You are an expert nursing education evaluator. Your job is to review a video of a nursing student attempting to correctly perform handwashing & sterile gloving, and then evaluate several specific details of the sterile gloving task. The previous steps of handwashing are provided for context.
 
 Sterility is very important in sterile gloving, and must be maintained throughout. The unfolded inner glove wrapper (besides a 1 inch margin around its edge) and the exterior surface of the gloves are considered sterile. Everything else, including the student's hands and the inside of the gloves are considered non-sterile.
 Sterile gloves have a cuff folded such that some of the nonsterile interior is exposed. This is so that the student can grab a portion of the glove with their bare hands while putting it on, but it means that once the gloves are on, the gloved fingers cannot touch the cuff. The cuff also prevents the glove's sterile exterior from rolling inward and touching nonsterile skin, and, as such, the folded cuff must be maintained as long as the gloves are worn.
@@ -409,18 +418,19 @@ You will be evaluating whether or not the student completed three components of 
 ### Steps
 1. Read the Rules section below, being sure to understand them completely and keep them in mind during your evaluation.
 2. Read the Previous Steps in handwashing, and use that context to inform your evaluations of the current Skill Mastery Criteria.
-3. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously. If a step is off screen or visually occluded and you are unsure of how to proceed, err on the side of the student passing.
-4. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning.
+3. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously. If a step is off screen or visually occluded and you are unsure of how to proceed, err on the side of the student passing. Use the Video Events to help focus on the relevant parts of the video.
+4. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning. It's okay if you're not entirely confident in your assessment.
 5. Attach a clear and brief piece of feedback with a neutral tone to each score that summarizes your chain-of-thought reasoning. Cite specific visual and/or audio evidence to support your reasoning.
 6. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
+   - `confidence`: Your confidence level in this score. One of: **UNCERTAIN**, **LOW**, **MEDIUM**, **HIGH**, **CERTAIN**.
    - `rationale`: A concise but complete explanation of your judgment. Write clearly with a neutral tone as if giving feedback to the student, covering all relevant details.
 
 {{{INFO}}}
 """
 
 PROMPT_7 = """
-You are an expert nursing education evaluator. Your job is to review a video of a nursing student demonstrating handwashing & sterile gloving, and then evaluate several specific details of the sterile gloving task. The previous steps in handwashing and sterile gloving are provided for context.
+You are an expert nursing education evaluator. Your job is to review a video of a nursing student attempting to correctly perform handwashing & sterile gloving, and then evaluate several specific details of the sterile gloving task. The previous steps in handwashing and sterile gloving are provided for context.
 
 Sterility is very important in sterile gloving, and must be maintained throughout. The unfolded inner glove wrapper (besides a 1 inch margin around its edge) and the exterior surface of the gloves are considered sterile. Everything else, including the student's hands and the inside of the gloves are considered non-sterile.
 Sterile gloves have a cuff folded such that some of the nonsterile interior is exposed. This is so that the student can grab a portion of the glove with their bare hands while putting it on, but it means that once the gloves are on, the gloved fingers cannot touch the cuff. The cuff also prevents the glove's sterile exterior from rolling inward and touching nonsterile skin, and, as such, the folded cuff must be maintained as long as the gloves are worn.
@@ -438,18 +448,19 @@ You will be evaluating whether or not the student completed two components of gl
 ### Steps
 1. Read the examples below and use them to understand how students may fail or succeed to complete the skill mastery criteria.
 2. Read the Previous Steps in handwashing and sterile gloving, and use that context to inform your evaluations of the current Skill Mastery Criteria.
-3. Watch the video and assess whether the student completed each of the skill mastery criteria successfully and continuously. If a step is off screen or visually occluded and you are unsure of how to proceed, err on the side of the student passing.
-4. For each item, evaluate if the student completed the exact task or exhibited exactly the prescribed behavior using chain-of-thought reasoning.
+3. Watch the video and assess whether the student completed each of the skill mastery criteria successfully and continuously. If a step is off screen or visually occluded and you are unsure of how to proceed, err on the side of the student passing. Use the Video Events to help focus on the relevant parts of the video.
+4. For each item, evaluate if the student completed the exact task or exhibited exactly the prescribed behavior using chain-of-thought reasoning. It's okay if you're not entirely confident in your assessment.
 5. Attach a clear and brief piece of feedback with a neutral tone to each score that summarizes your chain-of-thought reasoning. Cite specific visual and/or audio evidence to support your reasoning.
 6. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
+   - `confidence`: Your confidence level in this score. One of: **UNCERTAIN**, **LOW**, **MEDIUM**, **HIGH**, **CERTAIN**.
    - `rationale`: A concise but complete explanation of your judgment. Write clearly with a neutral tone as if giving feedback to the student, covering all relevant details.
 
 {{{INFO}}}
 """
 
 PROMPT_8 = """
-You are an expert nursing education evaluator. Your job is to review a video of a nursing student demonstrating handwashing & sterile gloving, and then evaluate several specific details of the sterile gloving task. The previous steps in handwashing and sterile gloving are provided for context.
+You are an expert nursing education evaluator. Your job is to review a video of a nursing student attempting to correctly perform handwashing & sterile gloving, and then evaluate several specific details of the sterile gloving task. The previous steps in handwashing and sterile gloving are provided for context.
 
 Sterility is very important in sterile gloving, and must be maintained throughout. The unfolded inner glove wrapper (besides a 1 inch margin around its edge) and the exterior surface of the gloves are considered sterile. Everything else, including the student's hands and the inside of the gloves are considered non-sterile.
 Sterile gloves have a cuff folded such that some of the nonsterile interior is exposed. This is so that the student can grab a portion of the glove with their bare hands while putting it on, but it means that once the gloves are on, the gloved fingers cannot touch the cuff. The cuff also prevents the glove's sterile exterior from rolling inward and touching nonsterile skin, and, as such, the folded cuff must be maintained as long as the gloves are worn.
@@ -468,17 +479,18 @@ You will be evaluating whether or not the student completed four components of g
 1. Read the Rules section below, being sure to understand them completely and keep them in mind during your evaluation.
 2. Read the Previous Steps in handwashing and sterile gloving, and use that context to inform your evaluations of the current Skill Mastery Criteria.
 3. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously. If a step is off screen or visually occluded and you are unsure of how to proceed, err on the side of the student passing.
-4. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning.
+4. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning. It's okay if you're not entirely confident in your assessment.
 5. Attach a clear and brief piece of feedback with a neutral tone to each score that summarizes your chain-of-thought reasoning. Cite specific visual and/or audio evidence to support your reasoning.
 6. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
+   - `confidence`: Your confidence level in this score. One of: **UNCERTAIN**, **LOW**, **MEDIUM**, **HIGH**, **CERTAIN**.
    - `rationale`: A concise but complete explanation of your judgment. Write clearly with a neutral tone as if giving feedback to the student, covering all relevant details.
 
 {{{INFO}}}
 """
 
 PROMPT_9 = """
-You are an expert nursing education evaluator. Your job is to review a video of a nursing student demonstrating handwashing & sterile gloving, and then evaluate several specific details of the sterile gloving task. The previous steps in handwashing and sterile gloving are provided for context.
+You are an expert nursing education evaluator. Your job is to review a video of a nursing student attempting to correctly perform handwashing & sterile gloving, and then evaluate several specific details of the sterile gloving task. The previous steps in handwashing and sterile gloving are provided for context.
 
 Sterility is very important in sterile gloving, and must be maintained throughout. The unfolded inner glove wrapper (besides a 1 inch margin around its edge) and the exterior surface of the gloves are considered sterile. Everything else, including the student's hands and the inside of the gloves are considered non-sterile.
 Sterile gloves have a cuff folded such that some of the nonsterile interior is exposed. This is so that the student can grab a portion of the glove with their bare hands while putting it on, but it means that once the gloves are on, the gloved fingers cannot touch the cuff. The cuff also prevents the glove's sterile exterior from rolling inward and touching nonsterile skin, and, as such, the folded cuff must be maintained as long as the gloves are worn.
@@ -496,18 +508,19 @@ You will be evaluating whether or not the student completed five components of g
 ### Steps
 1. Read the Rules section below, being sure to understand them completely and keep them in mind during your evaluation.
 2. Read the Previous Steps in handwashing and sterile gloving, and use that context to inform your evaluations of the current Skill Mastery Criteria.
-3. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously. If a step is off screen or visually occluded and you are unsure of how to proceed, err on the side of the student passing.
-4. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning.
+3. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously. If a step is off screen or visually occluded and you are unsure of how to proceed, err on the side of the student passing. Use the Video Events to help focus on the relevant parts of the video.
+4. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning. It's okay if you're not entirely confident in your assessment.
 5. Attach a clear and brief piece of feedback with a neutral tone to each score that summarizes your chain-of-thought reasoning. Cite specific visual and/or audio evidence to support your reasoning.
 6. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
+   - `confidence`: Your confidence level in this score. One of: **UNCERTAIN**, **LOW**, **MEDIUM**, **HIGH**, **CERTAIN**.
    - `rationale`: A concise but complete explanation of your judgment. Write clearly with a neutral tone as if giving feedback to the student, covering all relevant details.
 
 {{{INFO}}}
 """
 
 PROMPT_10 = """
-You are an expert nursing education evaluator. Your job is to review a video of a nursing student demonstrating handwashing & sterile gloving, and then evaluate several specific details of the sterile gloving task. The previous steps in handwashing and sterile gloving are provided for context.
+You are an expert nursing education evaluator. Your job is to review a video of a nursing student attempting to correctly perform handwashing & sterile gloving, and then evaluate several specific details of the sterile gloving task. The previous steps in handwashing and sterile gloving are provided for context.
 
 Sterility is very important in sterile gloving, and must be maintained throughout. The unfolded inner glove wrapper (besides a 1 inch margin around its edge) and the exterior surface of the gloves are considered sterile. Everything else, including the student's hands and the inside of the gloves are considered non-sterile.
 Sterile gloves have a cuff folded such that some of the nonsterile interior is exposed. This is so that the student can grab a portion of the glove with their bare hands while putting it on, but it means that once the gloves are on, the gloved fingers cannot touch the cuff. The cuff also prevents the glove's sterile exterior from rolling inward and touching nonsterile skin, and, as such, the folded cuff must be maintained as long as the gloves are worn.
@@ -525,18 +538,19 @@ You will be evaluating whether or not the student completed three components of 
 ### Steps
 1. Read the Rules section below, being sure to understand them completely and keep them in mind during your evaluation.
 2. Read the Previous Steps in handwashing and sterile gloving, and use that context to inform your evaluations of the current Skill Mastery Criteria.
-3. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously.
-4. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning.
+3. Watch the video and assess whether the student met each of the skill mastery criteria successfully and continuously. Use the Video Events to help focus on the relevant parts of the video.
+4. For each item, evaluate if the student completed the exact task using chain-of-thought reasoning. It's okay if you're not entirely confident in your assessment.
 5. Attach a clear and brief piece of feedback with a neutral tone to each score that summarizes your chain-of-thought reasoning. Cite specific visual and/or audio evidence to support your reasoning.
 6. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
+   - `confidence`: Your confidence level in this score. One of: **UNCERTAIN**, **LOW**, **MEDIUM**, **HIGH**, **CERTAIN**.
    - `rationale`: A concise but complete explanation of your judgment. Write clearly with a neutral tone as if giving feedback to the student, covering all relevant details.
 
 {{{INFO}}}
 """
 
 PROMPT_11 = """
-You are an expert nursing education evaluator. Your job is to review a video of a nursing student demonstrating handwashing & sterile gloving, and then evaluate several specific details of the sterile gloving task. The previous steps in handwashing and sterile gloving are provided for context.
+You are an expert nursing education evaluator. Your job is to review a video of a nursing student attempting to correctly perform handwashing & sterile gloving, and then evaluate several specific details of the sterile gloving task. The previous steps in handwashing and sterile gloving are provided for context.
 
 Sterility is very important in sterile gloving, and must be maintained throughout. The unfolded inner glove wrapper (besides a 1 inch margin around its edge) and the exterior surface of the gloves are considered sterile. Everything else, including the student's hands and the inside of the gloves are considered non-sterile.
 Sterile gloves have a cuff folded such that some of the nonsterile interior is exposed. This is so that the student can grab a portion of the glove with their bare hands while putting it on, but it means that once the gloves are on, the gloved fingers cannot touch the cuff. The cuff also prevents the glove's sterile exterior from rolling inward and touching nonsterile skin, and, as such, the folded cuff must be maintained as long as the gloves are worn.
@@ -554,18 +568,19 @@ You will be evaluating whether or not the student completed four components of g
 ### Steps
 1. Read the Rules section below, being sure to understand them completely and keep them in mind during your evaluation.
 2. Read the Previous Steps in handwashing and sterile gloving, and use that context to inform your evaluations of the current Skill Mastery Criteria.
-3. Watch the video and assess whether the student completed each of the skill mastery criteria successfully and continuously.
-4. For each item, evaluate if the student completed the exact task or exhibited exactly the prescribed behavior using chain-of-thought reasoning.
+3. Watch the video and assess whether the student completed each of the skill mastery criteria successfully and continuously. Use the Video Events to help focus on the relevant parts of the video.
+4. For each item, evaluate if the student completed the exact task or exhibited exactly the prescribed behavior using chain-of-thought reasoning. It's okay if you're not entirely confident in your assessment.
 5. Attach a clear and brief piece of feedback with a neutral tone to each score that summarizes your chain-of-thought reasoning. Cite specific visual and/or audio evidence to support your reasoning.
 6. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
+   - `confidence`: Your confidence level in this score. One of: **UNCERTAIN**, **LOW**, **MEDIUM**, **HIGH**, **CERTAIN**.
    - `rationale`: A concise but complete explanation of your judgment. Write clearly with a neutral tone as if giving feedback to the student, covering all relevant details.
 
 {{{INFO}}}
 """
 
 PROMPT_12 = """
-You are an expert nursing education evaluator. Your job is to review a video of a nursing student demonstrating handwashing & sterile gloving, and then evaluate several specific details of the sterile gloving task. The previous steps in handwashing and sterile gloving are provided for context.
+You are an expert nursing education evaluator. Your job is to review a video of a nursing student attempting to correctly perform handwashing & sterile gloving, and then evaluate several specific details of the sterile gloving task. The previous steps in handwashing and sterile gloving are provided for context.
 
 Sterility is very important in sterile gloving, and must be maintained throughout. The unfolded inner glove wrapper (besides a 1 inch margin around its edge) and the exterior surface of the gloves are considered sterile. Everything else, including the student's hands and the inside of the gloves are considered non-sterile.
 Sterile gloves have a cuff folded such that some of the nonsterile interior is exposed. This is so that the student can grab a portion of the glove with their bare hands while putting it on, but it means that once the gloves are on, the gloved fingers cannot touch the cuff. The cuff also prevents the glove's sterile exterior from rolling inward and touching nonsterile skin, and, as such, the folded cuff must be maintained as long as the gloves are worn.
@@ -582,11 +597,12 @@ You will be evaluating whether or not the student completed four components of g
 
 ### Steps
 1. Read the Previous Steps in handwashing and sterile gloving, and use that context to inform your evaluations of the current Skill Mastery Criteria.
-2. Watch the video and assess whether the student completed each of the skill mastery criteria successfully and continuously.
-3. For each item, evaluate if the student completed the exact task or exhibited exactly the prescribed behavior using chain-of-thought reasoning.
+2. Watch the video and assess whether the student completed each of the skill mastery criteria successfully and continuously. Use the Video Events to help focus on the relevant parts of the video.
+3. For each item, evaluate if the student completed the exact task or exhibited exactly the prescribed behavior using chain-of-thought reasoning. It's okay if you're not entirely confident in your assessment.
 4. Attach a clear and brief piece of feedback with a neutral tone to each score that summarizes your chain-of-thought reasoning. Cite specific visual and/or audio evidence to support your reasoning.
 5. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
+   - `confidence`: Your confidence level in this score. One of: **UNCERTAIN**, **LOW**, **MEDIUM**, **HIGH**, **CERTAIN**.
    - `rationale`: A concise but complete explanation of your judgment. Write clearly with a neutral tone as if giving feedback to the student, covering all relevant details.
 
 {{{INFO}}}
@@ -610,13 +626,14 @@ The grader’s assessment for these items is as follows:
 
 ### Steps
 1. Read the section below, being sure to understand the information completely and how the evaluation of these rubric items should be done.
-2. Watch the video without considering the grader's assessment in order to form your own judgment for whether the student successfully met that item.
+2. Watch the video without considering the grader's assessment in order to form your own judgment for whether the student successfully met that item. Use the Video Events to help focus on the relevant parts of the video.
 3. Then, watch the video again while considering the grader's assessment in order to determine whether you agree with the grader's original score and rationale.
 3. For each rubric item, determine whether you agree with the grader’s original score, thinking step by step.
 4. For each rubric item, determine whether each detail in the grader's original rationale is correct and well written.
 5. For each item, output:
    - `score_verdict`: **True** if you agree with the grader’s score for this item, or **False** if you do not.
    - `rationale_verdict`: **True** if you approve of the grader’s rationale for this item, or **False** if you do not.
+   - `confidence`: Your confidence level in your verdict. One of: **UNCERTAIN**, **LOW**, **MEDIUM**, **HIGH**, **CERTAIN**.
    - `reasoning`: A clear, detailed explanation of your chain of thought reasoning (including why you agree or disagree with the grader on that item). Cite specific visual and/or audio evidence directly from the video to support your reasoning.
 
 {{{INFO}}}
@@ -639,10 +656,11 @@ An evaluator disagreed with the original grader on the following items:
 1. Read the section below, being sure to understand the information completely and keep it in mind during your evaluation.
 2. Review the description of each of the rubric items, using the rules and/or examples to fully understand the requirements for each item.
 3. Review the previous steps in handwashing and sterile gloving, and use that context to inform your regrades of the current rubric items.
-4. Watch the video and assess whether the student completed each of the rubric items completely and fully, thinking step by step.
-5. For each item, evaluate if the student completed the exact task or exhibited exactly the prescribed behavior using chain-of-thought reasoning.
+4. Watch the video and assess whether the student completed each of the rubric items completely and fully, thinking step by step. Use the Video Events to help focus on the relevant parts of the video.
+5. For each item, evaluate if the student completed the exact task or exhibited exactly the prescribed behavior using chain-of-thought reasoning. It's okay if you're not entirely confident in your assessment.
 6. For each item, output:
    - `score`: **Not Demonstrated** if the student did not make a good faith attempt to complete the rubric item, **Fail** if the student attempted the rubric item but did not complete it satisfactorily, or **Pass** otherwise.
+   - `confidence`: Your confidence level in this score. One of: **UNCERTAIN**, **LOW**, **MEDIUM**, **HIGH**, **CERTAIN**.
    - `rationale`: A concise but complete explanation of your judgment. Write clearly with a neutral tone as if giving feedback to the student, covering all relevant details. Cite specific visual and/or audio evidence to support your reasoning.
 
 {{{INFO}}}
